@@ -13,8 +13,6 @@ env/
 RAG_Morocco_Project/.env
 
 # Vector DB and large data — too big for GitHub
-RAG_Morocco_Project/chroma_db/
-RAG_Morocco_Project/chroma_db_openai/
 RAG_Morocco_Project/temp_images/
 RAG_Morocco_Project/extracted_markdowns/
 
