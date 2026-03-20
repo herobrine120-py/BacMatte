@@ -3,7 +3,7 @@ services:
     name: bacmatte-api
     runtime: python
     rootDir: RAG_Morocco_Project
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python build_vector_db.py extracted_markdowns
     startCommand: uvicorn api:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: OPENAI_API_KEY
