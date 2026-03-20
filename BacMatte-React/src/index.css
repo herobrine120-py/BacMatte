@@ -561,4 +561,23 @@ button:disabled { opacity: 0.45; cursor: not-allowed !important; }
   font-size: 13px; font-weight: 500; font-family: inherit; width: calc(100% - 28px);
   transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 6px;
 }
-.trp-new-btn:hover { background: #222; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+
+/* ── Markdown & Math ── */
+.markdown-body {
+  font-family: inherit;
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+.markdown-body p { margin-bottom: 0.8em; margin-top: 0; }
+.markdown-body p:last-child { margin-bottom: 0; }
+.markdown-body ul, .markdown-body ol { margin-inline-start: 1.5em; margin-bottom: 0.8em; }
+.markdown-body strong { font-weight: 700; color: var(--text); }
+.markdown-body .katex-display {
+  margin: 1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+  direction: ltr; /* Math is strictly written left-to-right */
+}
+.markdown-body .katex { font-size: 1.05em; direction: ltr; }
+

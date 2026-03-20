@@ -1,8 +1,17 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { translations, LESSONS } from '../i18n'
 import { sendChat, checkHealth } from '../api'
+import ReactMarkdown from 'react-markdown'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
 
 // ─── Sub-components ─────────────────────────────────────────
+
+const preprocessMath = (text) => {
+  if (!text) return ''
+  return text.replace(/\\\(/g, '$').replace(/\\\)/g, '$').replace(/\\\[/g, '$$$$').replace(/\\\]/g, '$$$$')
+}
 
 function TypingIndicator() {
   return (
@@ -17,7 +26,11 @@ function Message({ msg }) {
   return (
     <div className={`tmsg ${msg.role}`}>
       <div className="tmsg-av">{msg.role === 'ai' ? '✦' : 'A'}</div>
-      <div className="tmsg-bubble" dangerouslySetInnerHTML={{ __html: msg.content.replace(/\n/g, '<br>') }} />
+      <div className="tmsg-bubble markdown-body" dir="auto">
+        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+          {preprocessMath(msg.content)}
+        </ReactMarkdown>
+      </div>
     </div>
   )
 }
@@ -27,7 +40,11 @@ function StreamingMessage({ content }) {
   return (
     <div className="tmsg ai">
       <div className="tmsg-av">✦</div>
-      <div className="tmsg-bubble streaming" dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br>') }} />
+      <div className="tmsg-bubble streaming markdown-body" dir="auto">
+        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+          {preprocessMath(content)}
+        </ReactMarkdown>
+      </div>
     </div>
   )
 }
