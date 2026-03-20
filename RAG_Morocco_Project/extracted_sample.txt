@@ -1,0 +1,175 @@
+
+--- Page 1 ---
+ 
+Sommaire de livre de cours : 
+ Programme du semestre 01 
+➢ Chapitre 0 : Test diagnostique et révision        
+➢ Chapitre 1 : Continuité d’une fonction               
+➢ Chapitre 2 : Dérivabilité d’une fonction            
+➢ Chapitre 3 : Etude des fonctions                            
+➢ Chapitre 4 : Limite d’une suite                               
+➢ Chapitre 5 : Primitive d’une fonction                  
+➢ Chapitre 6 : Fonction logarithme népérienne 
+➢ Chapitre 7 : Nombres complexes                          
+Programme du semestre 02    
+➢ Chapitre 8 : Fonction exponentielle                  
+➢ Chapitre 9 : Equations différentielle                   
+➢ Chapitre 10 : Calcul d’intégrales                      
+➢ Chapitre 11 : Produits scalaires dans 
+l’espace                                 
+➢ Chapitre 12 : Produit vectoriel                              
+➢ Chapitre 13 : Calcul de probabilités                    
+  
+ 
+➢ Cours détaillé 
+➢ Activités  
+➢ Exercices 
+corrigés  
+Livre des cours détaillés 
+Deuxième baccalauréat sciences 
+PC/SVT/ST 
+Prof Fayssal  
+Collection 
+FMATHS  
+Livre de cours   
+
+--- Page 2 ---
+Niveau : Deuxième bac 
+sciences PC/SVT/STE 
+ 
+ 
+ 
+admin 
+          Prof fayssal                     0681399067           www.elboutkhili.jimdofree.com 
+Chapitre 0 : Mise à niveau 
+Deuxième bac sciences expérimentales 
+➢ Test diagnostique  
+➢ Rappels de cours pour la mise à 
+niveau  
+➢ Série de révision corrigé 1  
+➢ Série de révision corrigé 2 
+ 
+ 
+
+--- Page 3 ---
+Page 1 /3 
+Test diagnostique             2 Bac sciences BIOF 
+Nom : ………………………………………………………………………… 
+Prof : Fayssal 
+QCM 05  
+Soit 𝒇 la fonction définie 
+par son graphe ci-contre : 
+ La droite (AB)  est la 
+tangente à (𝐂𝒇) au point 
+𝑨(𝟏; 𝟎) 
+ 
+ 
+ 
+A 
+B 
+C 
+D 
+𝒇′(𝟎) = −𝟏 
+𝐟′(𝟏) = 𝟑 
+𝐟′(𝟏) = 𝟐 
+𝐟′(𝟏) = 𝟎 
+QCM 06 
+On garde les mêmes données de la question QCM 05 
+A 
+B 
+C 
+D 
+𝐥𝐢𝐦
+𝒙⟶𝟎+ 𝒇(𝒙) = +∞ 
+𝐥𝐢𝐦
+𝒙⟶𝟎+ 𝒇(𝒙) = 𝟎 
+𝐥𝐢𝐦
+𝒙⟶𝟎+ 𝒇(𝒙) = −∞  
+𝐥𝐢𝐦
+𝒙⟶𝟎+ 𝒇(𝒙) = 𝟏 
+QCM 07 
+On garde les mêmes données de la question QCM 05 
+A 
+B 
+C 
+D 
+𝒇′(𝒄) = 𝒅 
+𝒇′(𝟏) = 𝟐 
+𝒇′(𝒄) = 𝟑 
+𝒇′(𝒄) = 𝟎 
+QCM 08 
+On garde les mêmes données de la question QCM 05 
+A 
+B 
+C 
+D 
+∀𝒙∈[𝟏; 𝟒]: 
+𝒇′′(𝒙) > 𝟎 
+∀𝒙∈[𝟏; 𝟒]: 
+𝒇(𝒙) > 𝟎 
+∀𝒙∈[𝟏; 𝟒]: 
+𝒇′(𝒙) > 𝟎 
+∀𝒙∈[𝟏; 𝟒]: 
+𝒇′′(𝒙) < 𝟎 
+Consignes 
+➢ L’épreuve dure 120 minutes 
+➢ Ce questionnaire comporte 20 QSM 
+➢ Chaque QCM comporte une seule réponse juste 
+➢ L’utilisation de calculatrice est autorisée 
+QCM 01 :                 
+L’ensemble des solutions de l’équation  𝒙𝟐+ 𝟑𝒙−𝟒= 𝟎 est 
+A 
+B 
+C 
+D 
+{𝟒; 𝟏} 
+∅ 
+{𝟏} 
+{−𝟒; 𝟏} 
+QCM 02 :                 
+𝐥𝐢𝐦
+𝒙→+∞
+𝒙+ 𝟐
+𝒙𝟐+ 𝟏= 
+A 
+B 
+C 
+D 
+𝟎 
+𝟐 
+𝟏 
++∞ 
+QCM 03 :                 
+Soit 𝒇 une fonction définit sur ]𝟎 ; +∞[ par 𝒇(𝒙) = 𝒙 −𝟐√𝒙 
+Alors 𝒇′(𝒙)  est égale à : 
+ 
+A 
+B 
+C 
+D 
+√𝒙−𝟏
+𝟐√𝒙  
+𝒙−𝟏
+√𝒙 (√𝒙+ 𝟏) 
+𝟏+ 𝒙+ 𝟐√𝒙
+(𝒙+ 𝟏)𝟐
+ 
+√𝒙−𝟐
+√𝒙  
+QCM 04 :                 
+𝐥𝐢𝐦
+𝒙→𝟎
+𝒙
+√𝟏+ 𝒙−𝟏
+= 
+A 
+B 
+C 
+D 
+𝟎 
+𝟏 
+𝟐 
+AUTRE  
+ 
+d 
+c 

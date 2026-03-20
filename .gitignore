@@ -1,0 +1,37 @@
+# Python backend
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Environment secrets — NEVER commit these
+.env
+RAG_Morocco_Project/.env
+
+# Vector DB and large data — too big for GitHub
+RAG_Morocco_Project/chroma_db/
+RAG_Morocco_Project/chroma_db_openai/
+RAG_Morocco_Project/temp_images/
+RAG_Morocco_Project/extracted_markdowns/
+
+# React / Node globally
+node_modules/
+dist/
+build/
+.next/
+.env
+BacMatte-React/.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
