@@ -29,8 +29,11 @@ def ingest_markdowns(md_dir_path):
     documents = loader.load()
     
     # 2. Split the markdown into chunks
-    # This splitter respects Markdown headings and structures
-    splitter = MarkdownTextSplitter(chunk_size=1000, chunk_overlap=200)
+    # Bug 8 fix: smaller chunks (400 tokens) with overlap — one concept per chunk
+    splitter = MarkdownTextSplitter(
+        chunk_size=400,
+        chunk_overlap=80,
+    )
     docs = splitter.split_documents(documents)
     
     print(f"Split the document into {len(docs)} chunks.")
