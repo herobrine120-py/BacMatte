@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { translations } from '../i18n'
 
-export default function Landing({ lang, setPage }) {
+export default function Landing({ lang, setPage, setLang }) {
   const t = translations[lang]
   const [activeMode, setActiveMode] = useState(0)
 
@@ -19,7 +19,7 @@ export default function Landing({ lang, setPage }) {
           <button className="btn btn-primary" style={{ padding: '11px 24px', fontSize: '15px' }} onClick={() => setPage('select')}>
             {t.hero.cta1}
           </button>
-          <button className="btn btn-secondary" style={{ padding: '11px 20px', fontSize: '15px' }} onClick={() => setPage('tutor')}>
+          <button className="btn btn-secondary" style={{ padding: '11px 20px', fontSize: '15px' }} onClick={() => setPage('select')}>
             {t.hero.cta2}
           </button>
         </div>
@@ -142,7 +142,9 @@ export default function Landing({ lang, setPage }) {
         <div className="footer-text">{t.footer}</div>
         <div style={{ display: 'flex', gap: '6px' }}>
           {['ar', 'fr', 'en'].map(l => (
-            <button key={l} className="lang-btn" style={{ padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg2)', color: 'var(--text2)', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: '12px' }}>
+            <button key={l} className="lang-btn"
+              style={{ padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--border)', background: lang === l ? 'var(--text)' : 'var(--bg2)', color: lang === l ? '#fff' : 'var(--text2)', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: '12px' }}
+              onClick={() => setLang?.(l)}>
               {l.toUpperCase()}
             </button>
           ))}

@@ -70,12 +70,15 @@ const MODE_LABELS = {
   correct: 'تصحيح', evaluate: 'تقييم', chat: 'سؤال حر',
 }
 
+// Bug 10 fix: modeKeys outside component so it's not recreated on every render
+const MODE_KEYS = ['explain', 'summarize', 'generate', 'correct', 'evaluate']
+
 // ─── Main Component ──────────────────────────────────────────
 export default function Tutor({ lang, setPage, level, subject }) {
   const t = translations[lang] || translations['ar']
   const subjectKey = subject?.key || 'phys'
   const lessons = LESSONS[subjectKey] || LESSONS.phys
-  const modeKeys = ['explain', 'summarize', 'generate', 'correct', 'evaluate']
+  const modeKeys = MODE_KEYS  // alias for backward compat
 
   // Core state
   const [activeLesson, setActiveLesson] = useState(lessons.find(l => l.active) || lessons[0])
@@ -117,7 +120,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
     const lessonLabel = `${activeLesson.fr} - ${activeLesson.ar}`
     const subjectLabel = subject?.fr || 'Physique-Chimie'
 
-    setMessages(prev => [...prev, { role: 'user', content: question }])
+    setMessages(prev => [...prev, { role: 'user', content: question, id: `u-${Date.now()}` }])
     setStreaming('')
     setIsStreaming(true)
 
@@ -131,14 +134,15 @@ export default function Tutor({ lang, setPage, level, subject }) {
       },
       () => {
         // Stream done — commit to messages
-        setMessages(prev => [...prev, { role: 'ai', content: accumulated }])
+        setMessages(prev => [...prev, { role: 'ai', content: accumulated, id: `a-${Date.now()}` }])
         setStreaming('')
         setIsStreaming(false)
       },
       (err) => {
         setMessages(prev => [...prev, {
           role: 'ai',
-          content: `⚠️ **خطأ في الاتصال بالخادم**:<br>${err}<br><br>تأكد من أن الخادم يعمل: \`uvicorn api:app --reload\``
+          content: `⚠️ **خطأ في الاتصال بالخادم**:<br>${err}<br><br>تأكد من أن الخادم يعمل: \`uvicorn api:app --reload\``,
+          id: `err-${Date.now()}`
         }])
         setStreaming('')
         setIsStreaming(false)
@@ -157,8 +161,8 @@ export default function Tutor({ lang, setPage, level, subject }) {
     if (isStreaming) return
     setActiveLesson(lesson)
     setMessages([])
-    const greeting = `تم الانتقال إلى درس: <strong>${lesson.ar}</strong> (${lesson.fr})<br>استخدم الأزرار أدناه أو اطرح سؤالك.`
-    setTimeout(() => setMessages([{ role: 'ai', content: greeting }]), 50)
+    const greeting = `تم الانتقال إلى درس: **${lesson.ar}** (${lesson.fr})\n\nاستخدم الأزرار أدناه أو اطرح سؤالك.`
+    setTimeout(() => setMessages([{ role: 'ai', content: greeting, id: `switch-${Date.now()}` }]), 50)
   }
 
   const switchMode = (idx) => {
@@ -290,7 +294,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
 
         {/* Chat messages */}
         <div className="t-chat" ref={chatRef}>
-          {messages.map((msg, i) => <Message key={i} msg={msg} />)}
+          {messages.map((msg) => <Message key={msg.id || msg.content.slice(0,20)} msg={msg} />)}
           {isStreaming && streaming === '' && <TypingIndicator />}
           {streaming && <StreamingMessage content={streaming} />}
         </div>
@@ -365,8 +369,8 @@ export default function Tutor({ lang, setPage, level, subject }) {
         <div className="trp-section" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <div className="trp-label">{lang === 'ar' ? 'الدروس' : 'Leçons'}</div>
           <div className="trp-lesson-list">
-            {filteredLessons.map((l, i) => (
-              <div key={i} className={`trp-lesson-item ${l.ar === activeLesson.ar ? 'active' : ''}`}
+            {filteredLessons.map((l) => (
+              <div key={l.ar} className={`trp-lesson-item ${l.ar === activeLesson.ar ? 'active' : ''}`}
                 onClick={() => switchLesson(l)}>
                 <span className="trp-lesson-num">{l.n}</span>
                 <span className="trp-lesson-text">{lang === 'ar' ? l.ar : l.fr}</span>

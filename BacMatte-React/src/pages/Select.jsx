@@ -67,11 +67,22 @@ export default function Select({ lang, setPage, onEnter }) {
         <div className="sel-cta">
           <button
             className="btn btn-primary"
-            style={{ fontSize: '15px', padding: '13px 36px', opacity: selLevel && selSubject ? 1 : 0.3, pointerEvents: selLevel && selSubject ? 'all' : 'none' }}
+            disabled={!(selLevel && selSubject)}
+            style={{ fontSize: '15px', padding: '13px 36px', opacity: selLevel && selSubject ? 1 : 0.4 }}
             onClick={handleEnter}
           >
             {t.select.cta}
           </button>
+          {!selLevel && !selSubject && (
+            <p style={{ marginTop: '10px', fontSize: '13px', color: 'var(--text3)', textAlign:'center' }}>
+              {lang === 'ar' ? 'اختر المستوى والمادة أولاً' : lang === 'fr' ? "Choisissez d'abord le niveau et la matière" : 'Choose your level and subject first'}
+            </p>
+          )}
+          {selLevel && !selSubject && (
+            <p style={{ marginTop: '10px', fontSize: '13px', color: 'var(--text3)', textAlign:'center' }}>
+              {lang === 'ar' ? 'اختر المادة الآن' : lang === 'fr' ? 'Choisissez maintenant la matière' : 'Now choose your subject'}
+            </p>
+          )}
         </div>
         <div className="sel-back">
           <button onClick={() => setPage('landing')}>{t.select.back}</button>

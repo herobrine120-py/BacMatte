@@ -13,7 +13,9 @@ export default function App() {
 
   // Apply lang/dir to document
   useEffect(() => {
-    document.body.className = lang
+    // Bug 4 fix: use classList to avoid destroying other body classes
+    document.body.classList.remove('ar', 'fr', 'en')
+    document.body.classList.add(lang)
     document.documentElement.lang = lang
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
   }, [lang])
@@ -36,7 +38,7 @@ export default function App() {
       )}
 
       {page === 'landing' && (
-        <Landing lang={lang} setPage={setPage} />
+        <Landing lang={lang} setPage={setPage} setLang={handleLangChange} />
       )}
       {page === 'select' && (
         <Select lang={lang} setPage={setPage} onEnter={handleEnterTutor} />
