@@ -141,7 +141,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
       (err) => {
         setMessages(prev => [...prev, {
           role: 'ai',
-          content: `⚠️ **خطأ في الاتصال بالخادم**:<br>${err}<br><br>تأكد من أن الخادم يعمل: \`uvicorn api:app --reload\``,
+          content: `⚠️ **خطأ في الاتصال**:<br>${err}<br><br>الرجاء التأكد من اتصالك بالإنترنت، أو المحاولة لاحقاً. (الخادم: ${BASE_URL})`,
           id: `err-${Date.now()}`
         }])
         setStreaming('')

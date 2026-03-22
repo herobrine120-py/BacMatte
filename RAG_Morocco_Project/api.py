@@ -76,11 +76,19 @@ if RATE_LIMIT_ENABLED:
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# ── Bug 5: CORS (already done, now with explicit origins) ──────
+# ── Bug# ── CORS configuration ──────────────────────────────────────────
+# Using explicit origins is more reliable than "*" for some browser/proxy setups
+allowed_origins = [
+    "https://bacmatte.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "*"  # Fallback
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # locked down: ["https://bacmatte.vercel.app", "http://localhost:5173"]
-    allow_credentials=False, # Bug fix: MUST be False if origins is ["*"]
+    allow_origins=allowed_origins,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
