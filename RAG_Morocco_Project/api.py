@@ -22,9 +22,14 @@ from langchain_core.output_parsers import StrOutputParser
 # ── Rate limiting ──────────────────────────────────────────────
 try:
     from slowapi import Limiter, _rate_limit_exceeded_handler
-    from slowapi.util import get_remote_address
     from slowapi.errors import RateLimitExceeded
-    limiter = Limiter(key_func=get_remote_address)
+    from starlette.requests import Request
+    
+    # Bug fix: use X-Forwarded-For behind Render's proxy, fallback to client host
+    def get_real_ip(req: Request) -> str:
+        return req.headers.get("X-Forwarded-For", req.client.host if req.client else "127.0.0.1").split(",")[0]
+        
+    limiter = Limiter(key_func=get_real_ip)
     RATE_LIMIT_ENABLED = True
 except ImportError:
     limiter = None
@@ -75,7 +80,7 @@ if RATE_LIMIT_ENABLED:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # locked down: ["https://bacmatte.vercel.app", "http://localhost:5173"]
-    allow_credentials=True,
+    allow_credentials=False, # Bug fix: MUST be False if origins is ["*"]
     allow_methods=["*"],
     allow_headers=["*"],
 )
