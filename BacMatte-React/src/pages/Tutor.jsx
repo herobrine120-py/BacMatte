@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { translations, LESSONS } from '../i18n'
-import { sendChat, checkHealth, BASE_URL } from '../api'
+import { sendChat, checkHealth } from '../api'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
@@ -141,7 +141,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
       (err) => {
         setMessages(prev => [...prev, {
           role: 'ai',
-          content: `⚠️ **خطأ في الاتصال**:<br>${err}<br><br>الرجاء التأكد من اتصالك بالإنترنت، أو المحاولة لاحقاً. (الخادم: ${BASE_URL})`,
+          content: `⚠️ **خطأ في الاتصال**:<br>${err}<br><br>الرجاء التأكد من اتصالك بالإنترنت، أو المحاولة لاحقاً.`,
           id: `err-${Date.now()}`
         }])
         setStreaming('')
@@ -279,8 +279,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
             <p>{lang === 'ar' ? 'اختر إجراءً سريعاً أو اكتب سؤالك مباشرة' : 'Choisissez une action rapide ou posez votre question'}</p>
             {backendStatus === 'offline' && (
               <div className="t-offline-banner">
-                ⚠️ الخادم غير متصل. (API: {BASE_URL})<br/>
-                تأكد من عمل الرابط أعلاه، أو شغّل الخادم محلياً.
+                ⚠️ الخادم غير متصل حالياً. الرجاء المحاولة لاحقاً.
               </div>
             )}
             <div className="t-welcome-cards">
