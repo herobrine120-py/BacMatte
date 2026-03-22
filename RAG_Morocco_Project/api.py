@@ -210,7 +210,7 @@ def get_cache_key(question: str, subject: str, lesson: str, mode: str) -> str:
 async def chat(request: Request, req: ChatRequest):
     # Rate limit: 20 req/min per IP (if slowapi installed)
     if RATE_LIMIT_ENABLED:
-        await limiter._check_request_limit(request, chat, "20/minute")
+        limiter._check_request_limit(request, chat, "20/minute")
 
     retriever = request.app.state.retriever
     llm = request.app.state.llm
