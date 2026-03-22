@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { translations, LESSONS } from '../i18n'
-import { sendChat, checkHealth } from '../api'
+import { sendChat, checkHealth, BASE_URL } from '../api'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
@@ -279,7 +279,8 @@ export default function Tutor({ lang, setPage, level, subject }) {
             <p>{lang === 'ar' ? 'اختر إجراءً سريعاً أو اكتب سؤالك مباشرة' : 'Choisissez une action rapide ou posez votre question'}</p>
             {backendStatus === 'offline' && (
               <div className="t-offline-banner">
-                ⚠️ الخادم غير متصل. شغّل: <code>uvicorn api:app --reload</code> في مجلد RAG_Morocco_Project
+                ⚠️ الخادم غير متصل. (API: {BASE_URL})<br/>
+                تأكد من عمل الرابط أعلاه، أو شغّل الخادم محلياً.
               </div>
             )}
             <div className="t-welcome-cards">
