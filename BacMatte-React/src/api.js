@@ -1,5 +1,5 @@
 // Centralized API client for BacMatte RAG backend
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://bacmatte.onrender.com' : 'http://localhost:8000')
 console.log("BacMatte API running at:", BASE_URL);
 
 /**
