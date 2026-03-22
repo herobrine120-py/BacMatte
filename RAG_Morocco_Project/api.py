@@ -76,22 +76,31 @@ if RATE_LIMIT_ENABLED:
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# ── Bug# ── CORS configuration ──────────────────────────────────────────
-# Using explicit origins is more reliable than "*" for some browser/proxy setups
-allowed_origins = [
-    "https://bacmatte.vercel.app",
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "*"  # Fallback
-]
+# ── Bug# ── CUSTOM CORS MIDDLEWARE (Bulletproof) ───────────────────────
+@app.middleware("http")
+async def add_cors_header(request: Request, call_next):
+    # Handle preflight OPTIONS requests directly
+    if request.method == "OPTIONS":
+        response = JSONResponse(content="OK")
+    else:
+        response = await call_next(request)
+    
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS, DELETE, PUT"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+    return response
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# ── GLOBAL EXCEPTION HANDLER (Ensures CORS on 500s) ───────────
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    import traceback
+    print(f"GLOBAL ERROR: {str(exc)}")
+    traceback.print_exc()
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error", "msg": str(exc)},
+        headers={"Access-Control-Allow-Origin": "*"}
+    )
 
 # ── Bug 9 fix: Pydantic with validators ────────────────────────
 VALID_MODES = {"chat", "explain", "summarize", "generate", "correct", "evaluate"}
