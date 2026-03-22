@@ -1,5 +1,6 @@
 // Centralized API client for BacMatte RAG backend
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+console.log("BacMatte API running at:", BASE_URL);
 
 /**
  * sendChat — streams an AI response token by token.
