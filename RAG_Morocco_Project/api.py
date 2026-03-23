@@ -284,6 +284,15 @@ async def health(request: Request):
         )
 
 
+# ── BUG DEBUG ENDPOINT ──────────────────────────────────────────
+@app.get("/debug_rag")
+async def debug_rag(q: str):
+    try:
+        docs = app.state.retriever.invoke(q)
+        return {"query": q, "docs": [d.page_content for d in docs]}
+    except Exception as e:
+        return {"error": str(e)}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)
