@@ -1,7 +1,14 @@
 import { translations } from '../i18n'
+import { useAuth } from '../context/AuthContext'
 
 export default function Navbar({ lang, setLang, setPage }) {
   const t = translations[lang].nav
+  const { user, signOut } = useAuth()
+
+  const handleSignOut = async () => {
+    await signOut()
+    setPage('landing')
+  }
 
   return (
     <nav className="nav">
@@ -26,9 +33,17 @@ export default function Navbar({ lang, setLang, setPage }) {
             </button>
           ))}
         </div>
-        <button className="btn btn-outline" onClick={() => setPage('auth')}>
-          {t.signin}
-        </button>
+        
+        {user ? (
+          <button className="btn btn-outline" onClick={handleSignOut} style={{ borderColor: 'var(--red-light)', color: 'var(--red)' }}>
+            {lang === 'ar' ? 'تسجيل الخروج' : 'Déconnexion'}
+          </button>
+        ) : (
+          <button className="btn btn-outline" onClick={() => setPage('auth')}>
+            {t.signin}
+          </button>
+        )}
+        
         <button className="btn btn-primary" onClick={() => setPage('select')}>
           {t.start}
         </button>

@@ -1,0 +1,9 @@
+{
+  "query": "Fonctions exponentielles - الدوال الأسية",
+  "docs": [
+    "```\n5) Dérivée de la fonction exponentielle",
+    "### Lien exponentielle et logarithme\nSoit $y = e^x = f(x)$ et $x = \\ln(y)$ = la fonction logarithme (népérien) sont des fonctions réciproques : leurs courbes sont représentées sont symétriques par rapport à la droite bisséctrice $(y = x)$\n\n-   $exp(x) = x$\n-   $exp(\\ln(x)) = x$",
+    "##  Rappel mathématique\n\n### Propriétés des exponentielles\n- $a, b$ et $c$ sont des réels strictement positifs, n'est en nul:\n  - Produit : $ ab = e^{a+b} $\n  - Inverse : $ e^{-a} = \\frac{1}{e^{a}} $\n  - Quotient : $ \\frac{e^a}{e^b} = e^{a-b} $\n  - Puissance : $ e^{ab} = (e^a)^b $\n  - Racine carrée : $ \\sqrt{e} = e^{\\frac{1}{2}} $",
+    "```\n\n<!-- Page 177 -->\n\n```markdown\n# Prof : Fayssal\n## Site web : www.elboutkhili.jimdofree.com\n\n# Série d’exercices : Fonction exponentielle\n## 2 BAC BIOF\n\n## Exercice 01\n1) Résoudre dans $\\mathbb{IR}$ les équations suivantes :\n   - $(E_1) : e^{x+2} = 3$\n   - $(E_2) : e^{x^3-x} = 1$\n   - $(E_3) : e^{2x} + e^x - 2 = 0$\n   - $(E_4) : e^{x^2-3} - e^{-2x} = 0$"
+  ]
+}

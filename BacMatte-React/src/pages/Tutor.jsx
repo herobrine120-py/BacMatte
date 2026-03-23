@@ -5,6 +5,8 @@ import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
+import { supabase } from '../supabase'
+import { useAuth } from '../context/AuthContext'
 
 // ─── Sub-components ─────────────────────────────────────────
 
@@ -50,13 +52,6 @@ function StreamingMessage({ content }) {
 }
 
 // ─── Constants ───────────────────────────────────────────────
-const MOCK_HISTORY = [
-  { id: 1, title: 'شرح قانون انحفاظ الطاقة', sub: 'Physique · il y a 2h' },
-  { id: 2, title: 'تمارين على التكامل', sub: 'Maths · il y a 5h' },
-  { id: 3, title: 'الموجات الميكانيكية', sub: 'Physique · Hier' },
-  { id: 4, title: 'ملخص درس النواة الذرية', sub: 'Physique · Hier' },
-  { id: 5, title: 'حل تمرين الاشتقاق', sub: 'Maths · Lundi' },
-]
 
 const TEMPLATES = [
   { ico: '📖', label: 'اشرح لي الدرس', hint: 'Expliquer la leçon', mode: 'explain' },
@@ -76,6 +71,7 @@ const MODE_KEYS = ['explain', 'summarize', 'generate', 'correct', 'evaluate']
 // ─── Main Component ──────────────────────────────────────────
 export default function Tutor({ lang, setPage, level, subject }) {
   const t = translations[lang] || translations['ar']
+  const { user } = useAuth()
   const subjectKey = subject?.key || 'phys'
   const lessons = LESSONS[subjectKey] || LESSONS.phys
   const modeKeys = MODE_KEYS  // alias for backward compat
@@ -89,6 +85,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
   const [input, setInput] = useState('')
   const [search, setSearch] = useState('')
   const [activeConvId, setActiveConvId] = useState(null)
+  const [history, setHistory] = useState([])
   const [backendStatus, setBackendStatus] = useState('checking') // checking | ok | offline
   // Layout state
   const [rightLevel, setRightLevel] = useState(level || '2BAC')
@@ -108,13 +105,44 @@ export default function Tutor({ lang, setPage, level, subject }) {
     checkHealth().then(res => setBackendStatus(res.status === 'ok' ? 'ok' : 'offline'))
   }, [])
 
+  // Load history from Supabase
+  useEffect(() => {
+    if (!user) return
+    const fetchHistory = async () => {
+      const { data } = await supabase
+        .from('chat_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+      if (data) setHistory(data)
+    }
+    fetchHistory()
+  }, [user])
+
+  // Load a specific conversation's messages
+  const loadConv = async (cId) => {
+    if (isStreaming) return
+    setActiveConvId(cId)
+    setMessages([])
+    if (!user) return
+    
+    // We can show a temporary loading state here if we want, but it should be fast
+    const { data } = await supabase
+      .from('chat_messages')
+      .select('*')
+      .eq('session_id', cId)
+      .order('created_at', { ascending: true })
+      
+    if (data) setMessages(data)
+  }
+
   // Auto-scroll
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight
   }, [messages, streaming, isStreaming])
 
   // ── Core: send a message to the RAG API ────────────────────
-  const askRAG = useCallback((question, modeOverride) => {
+  const askRAG = useCallback(async (question, modeOverride) => {
     if (!question.trim()) return
     const mode = modeOverride || modeKeys[activeMode]
     const lessonLabel = `${activeLesson.fr} - ${activeLesson.ar}`
@@ -124,6 +152,35 @@ export default function Tutor({ lang, setPage, level, subject }) {
     setStreaming('')
     setIsStreaming(true)
 
+    let currentSessionId = activeConvId
+    
+    // Create new session if none exists
+    if (!currentSessionId && user) {
+      const { data: newSession } = await supabase
+        .from('chat_sessions')
+        .insert({
+          user_id: user.id,
+          title: question.substring(0, 40) + (question.length > 40 ? '...' : ''),
+          subject: subjectLabel,
+          lesson: lessonLabel
+        })
+        .select()
+        .single()
+      
+      if (newSession) {
+        currentSessionId = newSession.id
+        setActiveConvId(newSession.id)
+        setHistory(prev => [newSession, ...prev])
+      }
+    }
+
+    // Insert user question to DB
+    if (currentSessionId && user) {
+      await supabase.from('chat_messages').insert({
+        session_id: currentSessionId, role: 'user', content: question
+      })
+    }
+
     let accumulated = ''
 
     sendChat(
@@ -132,11 +189,18 @@ export default function Tutor({ lang, setPage, level, subject }) {
         accumulated += token
         setStreaming(accumulated)
       },
-      () => {
+      async () => {
         // Stream done — commit to messages
         setMessages(prev => [...prev, { role: 'ai', content: accumulated, id: `a-${Date.now()}` }])
         setStreaming('')
         setIsStreaming(false)
+        
+        // Save AI response to DB
+        if (currentSessionId && user) {
+          await supabase.from('chat_messages').insert({
+            session_id: currentSessionId, role: 'ai', content: accumulated
+          })
+        }
       },
       (err) => {
         setMessages(prev => [...prev, {
@@ -148,7 +212,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
         setIsStreaming(false)
       }
     )
-  }, [activeMode, activeLesson, subject, rightLevel, modeKeys])
+  }, [activeMode, activeLesson, subject, rightLevel, modeKeys, activeConvId, user])
 
   const sendMessage = (text) => {
     if (isStreaming) return
@@ -161,6 +225,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
     if (isStreaming) return
     setActiveLesson(lesson)
     setMessages([])
+    setActiveConvId(null)
     const greeting = `تم الانتقال إلى درس: **${lesson.ar}** (${lesson.fr})\n\nاستخدم الأزرار أدناه أو اطرح سؤالك.`
     setTimeout(() => setMessages([{ role: 'ai', content: greeting, id: `switch-${Date.now()}` }]), 50)
   }
@@ -232,12 +297,17 @@ export default function Tutor({ lang, setPage, level, subject }) {
 
         <div className="tsb-section-label" style={{ marginTop: 12 }}>{lang === 'ar' ? 'المحادثات السابقة' : 'Historique'}</div>
         <div className="tsb-history">
-          {MOCK_HISTORY.map(c => (
-            <div key={c.id} className={`tsb-conv ${activeConvId === c.id ? 'active' : ''}`} onClick={() => setActiveConvId(c.id)}>
+          {history.map(c => (
+            <div key={c.id} className={`tsb-conv ${activeConvId === c.id ? 'active' : ''}`} onClick={() => loadConv(c.id)}>
               <div className="tsb-conv-title">{c.title}</div>
-              <div className="tsb-conv-sub">{c.sub}</div>
+              <div className="tsb-conv-sub">{c.subject} · {new Date(c.created_at).toLocaleDateString()}</div>
             </div>
           ))}
+          {history.length === 0 && (
+            <div style={{ padding: '0 24px', fontSize: 13, color: 'var(--text-3)', fontStyle: 'italic' }}>
+              {lang === 'ar' ? 'لا توجد محادثات سابقة.' : 'Aucun historique.'}
+            </div>
+          )}
         </div>
 
         <div className="tsb-settings-row">

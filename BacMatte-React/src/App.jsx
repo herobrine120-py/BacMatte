@@ -4,8 +4,10 @@ import Landing from './pages/Landing'
 import Select from './pages/Select'
 import Tutor from './pages/Tutor'
 import Auth from './pages/Auth'
+import { useAuth } from './context/AuthContext'
 
 export default function App() {
+  const { user } = useAuth()
   const [lang, setLang] = useState('ar')
   const [page, setPage] = useState('landing')
   const [level, setLevel] = useState('')
@@ -13,7 +15,6 @@ export default function App() {
 
   // Apply lang/dir to document
   useEffect(() => {
-    // Bug 4 fix: use classList to avoid destroying other body classes
     document.body.classList.remove('ar', 'fr', 'en')
     document.body.classList.add(lang)
     document.documentElement.lang = lang
@@ -29,7 +30,13 @@ export default function App() {
     setSubject(sj)
   }
 
-  const showNav = page !== 'tutor'
+  // Protected Routes Logic
+  let currentPage = page
+  if (!user && (page === 'select' || page === 'tutor')) {
+    currentPage = 'auth'
+  }
+
+  const showNav = currentPage !== 'tutor'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -37,16 +44,16 @@ export default function App() {
         <Navbar lang={lang} setLang={handleLangChange} setPage={setPage} />
       )}
 
-      {page === 'landing' && (
+      {currentPage === 'landing' && (
         <Landing lang={lang} setPage={setPage} setLang={handleLangChange} />
       )}
-      {page === 'select' && (
+      {currentPage === 'select' && (
         <Select lang={lang} setPage={setPage} onEnter={handleEnterTutor} />
       )}
-      {page === 'tutor' && (
+      {currentPage === 'tutor' && (
         <Tutor lang={lang} setPage={setPage} level={level} subject={subject} />
       )}
-      {page === 'auth' && (
+      {currentPage === 'auth' && (
         <Auth lang={lang} setPage={setPage} />
       )}
     </div>
