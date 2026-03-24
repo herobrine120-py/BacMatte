@@ -9,9 +9,9 @@ embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 db = Chroma(persist_directory=DB_DIR, embedding_function=embeddings)
 
 query = "Fonctions exponentielles - الدوال الأسية"
-# test retrieval
-docs = db.similarity_search(query, k=4)
-print(f"--- QUERY: {query} ---")
+# test retrieval with strict metadata filter
+docs = db.similarity_search(query, k=4, filter={"subject": "Mathématiques"})
+print(f"--- QUERY: {query} [Filter: Mathématiques] ---")
 for i, doc in enumerate(docs):
     print(f"CHUNK {i+1}:")
     print(doc.page_content[:200].replace('\n', ' '))

@@ -17,8 +17,9 @@ export default function Navbar({ lang, setLang, setPage }) {
       </button>
 
       <div className="nav-center">
-        <button className="nav-link">{t.features}</button>
-        <button className="nav-link">{t.pricing}</button>
+        {/* These can be linked to landing sections if they exist, or keep as static links for now */}
+        <button className="nav-link" onClick={() => { const el = document.getElementById('features'); if(el) el.scrollIntoView({behavior:'smooth'}) }}>{t.features}</button>
+        <button className="nav-link" onClick={() => { const el = document.getElementById('pricing'); if(el) el.scrollIntoView({behavior:'smooth'}) }}>{t.pricing}</button>
       </div>
 
       <div className="nav-right">
@@ -36,7 +37,7 @@ export default function Navbar({ lang, setLang, setPage }) {
         
         {user ? (
           <button className="btn btn-outline" onClick={handleSignOut} style={{ borderColor: 'var(--red-light)', color: 'var(--red)' }}>
-            {lang === 'ar' ? 'تسجيل الخروج' : 'Déconnexion'}
+            {t.signout || (lang === 'ar' ? 'تسجيل الخروج' : 'Déconnexion')}
           </button>
         ) : (
           <button className="btn btn-outline" onClick={() => setPage('auth')}>

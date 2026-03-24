@@ -1,7 +1,7 @@
 export const translations = {
   ar: {
     dir: 'rtl',
-    nav: { features: 'المميزات', pricing: 'الأسعار', signin: 'دخول', start: 'ابدأ مجاناً' },
+    nav: { features: 'المميزات', pricing: 'الأسعار', signin: 'دخول', start: 'ابدأ مجاناً', signout: 'خروج' },
     hero: {
       badge: 'مخصص لطلاب البكالوريا بالمغرب · 1BAC & 2BAC',
       title1: 'مساعدك الذكي',
@@ -85,7 +85,7 @@ export const translations = {
 
   fr: {
     dir: 'ltr',
-    nav: { features: 'Fonctionnalités', pricing: 'Tarifs', signin: 'Connexion', start: 'Commencer' },
+    nav: { features: 'Fonctionnalités', pricing: 'Tarifs', signin: 'Connexion', start: 'Commencer', signout: 'Déconnexion' },
     hero: {
       badge: 'Conçu pour les lycéens marocains · 1BAC & 2BAC',
       title1: 'Ton assistant IA',
@@ -169,7 +169,7 @@ export const translations = {
 
   en: {
     dir: 'ltr',
-    nav: { features: 'Features', pricing: 'Pricing', signin: 'Sign in', start: 'Get started' },
+    nav: { features: 'Features', pricing: 'Pricing', signin: 'Sign in', start: 'Get started', signout: 'Sign out' },
     hero: {
       badge: 'Built for Moroccan high school students · 1BAC & 2BAC',
       title1: 'Your AI tutor',

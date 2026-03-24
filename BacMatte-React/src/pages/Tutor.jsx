@@ -95,6 +95,21 @@ export default function Tutor({ lang, setPage, level, subject }) {
 
   const chatRef = useRef(null)
   const textareaRef = useRef(null)
+  const abortControllerRef = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) abortControllerRef.current.abort()
+    }
+  }, [])
+
+  const abortActiveStream = () => {
+    if (isStreaming && abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      setIsStreaming(false)
+      setStreaming('')
+    }
+  }
 
   const filteredLessons = lessons.filter(l =>
     l.ar.includes(search) || l.fr.toLowerCase().includes(search.toLowerCase())
@@ -121,7 +136,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
 
   // Load a specific conversation's messages
   const loadConv = async (cId) => {
-    if (isStreaming) return
+    abortActiveStream()
     setActiveConvId(cId)
     setMessages([])
     if (!user) return
@@ -147,6 +162,9 @@ export default function Tutor({ lang, setPage, level, subject }) {
     const mode = modeOverride || modeKeys[activeMode]
     const lessonLabel = `${activeLesson.fr} - ${activeLesson.ar}`
     const subjectLabel = subject?.fr || 'Physique-Chimie'
+
+    abortActiveStream()
+    abortControllerRef.current = new AbortController()
 
     setMessages(prev => [...prev, { role: 'user', content: question, id: `u-${Date.now()}` }])
     setStreaming('')
@@ -176,9 +194,13 @@ export default function Tutor({ lang, setPage, level, subject }) {
 
     // Insert user question to DB
     if (currentSessionId && user) {
-      await supabase.from('chat_messages').insert({
-        session_id: currentSessionId, role: 'user', content: question
-      })
+      try {
+        await supabase.from('chat_messages').insert({
+          session_id: currentSessionId, role: 'user', content: question
+        })
+      } catch (err) {
+        console.error('Failed to save user message:', err)
+      }
     }
 
     let accumulated = ''
@@ -197,9 +219,13 @@ export default function Tutor({ lang, setPage, level, subject }) {
         
         // Save AI response to DB
         if (currentSessionId && user) {
-          await supabase.from('chat_messages').insert({
-            session_id: currentSessionId, role: 'ai', content: accumulated
-          })
+          try {
+            await supabase.from('chat_messages').insert({
+              session_id: currentSessionId, role: 'ai', content: accumulated
+            })
+          } catch (err) {
+            console.error('Failed to save AI message:', err)
+          }
         }
       },
       (err) => {
@@ -210,7 +236,8 @@ export default function Tutor({ lang, setPage, level, subject }) {
         }])
         setStreaming('')
         setIsStreaming(false)
-      }
+      },
+      abortControllerRef.current.signal
     )
   }, [activeMode, activeLesson, subject, rightLevel, modeKeys, activeConvId, user])
 
@@ -222,7 +249,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
   }
 
   const switchLesson = (lesson) => {
-    if (isStreaming) return
+    abortActiveStream()
     setActiveLesson(lesson)
     setMessages([])
     setActiveConvId(null)
@@ -267,7 +294,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
             <span title={backendStatus === 'ok' ? 'Backend connected' : backendStatus === 'offline' ? 'Backend offline' : 'Checking...'}
               style={{ width: 8, height: 8, borderRadius: '50%', background: backendStatus === 'ok' ? '#22c55e' : backendStatus === 'offline' ? '#ef4444' : '#f59e0b', display: 'inline-block' }} />
             <button className="tsb-new-chat" title="New chat"
-              onClick={() => { setMessages([]); setStreaming(''); setActiveConvId(null) }}>✏️</button>
+              onClick={() => { abortActiveStream(); setMessages([]); setActiveConvId(null) }}>✏️</button>
           </div>
         </div>
 
@@ -318,8 +345,8 @@ export default function Tutor({ lang, setPage, level, subject }) {
         <div className="tsb-footer">
           <div className="user-avatar">A</div>
           <div style={{ flex: 1 }}>
-            <div className="user-name">{t.tutor?.userName || 'طالب BAC'}</div>
-            <div className="tsb-user-email">student@bacmatte.ma</div>
+            <div className="user-name">{user?.user_metadata?.full_name || t.tutor?.userName || 'طالب BAC'}</div>
+            <div className="tsb-user-email">{user?.email || 'student@bacmatte.ma'}</div>
           </div>
           <span className="user-plan">Pro</span>
         </div>
@@ -364,7 +391,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
 
         {/* Chat messages */}
         <div className="t-chat" ref={chatRef}>
-          {messages.map((msg) => <Message key={msg.id || msg.content.slice(0,20)} msg={msg} />)}
+          {messages.map((msg, i) => <Message key={msg.id || i} msg={msg} />)}
           {isStreaming && streaming === '' && <TypingIndicator />}
           {streaming && <StreamingMessage content={streaming} />}
         </div>
@@ -449,7 +476,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
           </div>
         </div>
 
-        <button className="trp-new-btn" onClick={() => { setMessages([]); setStreaming(''); setActiveConvId(null) }}>
+        <button className="trp-new-btn" onClick={() => { abortActiveStream(); setMessages([]); setActiveConvId(null) }}>
           ✏️ {lang === 'ar' ? 'محادثة جديدة' : 'Nouvelle discussion'}
         </button>
       </div>

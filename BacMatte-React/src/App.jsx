@@ -9,9 +9,21 @@ import { useAuth } from './context/AuthContext'
 export default function App() {
   const { user } = useAuth()
   const [lang, setLang] = useState('ar')
-  const [page, setPage] = useState('landing')
-  const [level, setLevel] = useState('')
-  const [subject, setSubject] = useState(null)
+  const [page, setPageState] = useState(() => localStorage.getItem('bacmatte_page') || 'landing')
+  const [level, setLevelState] = useState(() => localStorage.getItem('bacmatte_level') || '')
+  const [subject, setSubjectState] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bacmatte_subject')
+      return saved ? JSON.parse(saved) : null
+    } catch {
+      return null
+    }
+  })
+
+  const setPage = (p) => {
+    localStorage.setItem('bacmatte_page', p)
+    setPageState(p)
+  }
 
   // Apply lang/dir to document
   useEffect(() => {
@@ -26,8 +38,10 @@ export default function App() {
   }
 
   const handleEnterTutor = (lv, sj) => {
-    setLevel(lv)
-    setSubject(sj)
+    localStorage.setItem('bacmatte_level', lv)
+    localStorage.setItem('bacmatte_subject', JSON.stringify(sj))
+    setLevelState(lv)
+    setSubjectState(sj)
   }
 
   // Protected Routes Logic

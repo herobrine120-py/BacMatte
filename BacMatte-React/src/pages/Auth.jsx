@@ -7,8 +7,10 @@ export default function Auth({ lang, setPage }) {
   const [tab, setTab] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
 
   const handleAuth = async () => {
     if (!email || !password) {
@@ -21,14 +23,20 @@ export default function Auth({ lang, setPage }) {
 
     try {
       if (tab === 'register') {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: { full_name: name }
+          }
         })
         if (error) throw error
-        // Note: For simplicity, without email confirmation requirement this logs them right in if disabled in Supabase console,
-        // otherwise it asks them to check their email.
-        setPage('select')
+        
+        if (data?.session) {
+          setPage('select')
+        } else {
+          setSuccessMsg(lang === 'ar' ? 'تم إنشاء الحساب! يرجى التحقق من بريدك الإلكتروني لتفعيله.' : 'Compte créé ! Veuillez vérifier votre email pour l\'activer.')
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -100,10 +108,16 @@ export default function Auth({ lang, setPage }) {
             </div>
           )}
 
+          {successMsg && (
+            <div style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', padding: '10px 14px', borderRadius: '8px', fontSize: '14px', marginBottom: '16px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+              ✅ {successMsg}
+            </div>
+          )}
+
           {tab === 'register' && (
             <div className="form-group">
               <label className="form-label">{t.name}</label>
-              <input className="form-input" type="text" placeholder="Mohammed Doe" />
+              <input className="form-input" type="text" placeholder="Mohammed Doe" value={name} onChange={e => setName(e.target.value)} />
             </div>
           )}
           <div className="form-group">

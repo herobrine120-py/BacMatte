@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 # Langchain imports
 from langchain_community.document_loaders import TextLoader
-from langchain_text_splitters import MarkdownTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 
@@ -28,15 +28,29 @@ def ingest_markdowns(md_dir_path):
     loader = DirectoryLoader(md_dir_path, glob="*.md", loader_cls=TextLoader, loader_kwargs={'encoding': 'utf-8'})
     documents = loader.load()
     
+    # 1.5 Inject Metadata based on filename (Critical for avoiding cross-subject retrieval bugs)
+    for doc in documents:
+        filename = os.path.basename(doc.metadata.get("source", ""))
+        subject = "Physique-Chimie" # Default
+        if "math" in filename.lower() or "analyse" in filename.lower() or "algebre" in filename.lower():
+            subject = "Mathématiques"
+        elif "svt" in filename.lower() or "bio" in filename.lower():
+            subject = "SVT"
+        
+        doc.metadata["subject"] = subject
+        # Use filename prefix as lesson identifier
+        doc.metadata["lesson"] = filename.replace("_gemini_extracted.md", "").replace(".md", "")
+    
     # 2. Split the markdown into chunks
-    # Bug 8 fix: smaller chunks (400 tokens) with overlap — one concept per chunk
-    splitter = MarkdownTextSplitter(
-        chunk_size=400,
-        chunk_overlap=80,
+    # Bug Fix: larger chunks (1000 tokens) to avoid cutting math equations in half
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=200,
+        separators=["\n\n", "\n", " ", ""]
     )
     docs = splitter.split_documents(documents)
     
-    print(f"Split the document into {len(docs)} chunks.")
+    print(f"Split {len(documents)} documents into {len(docs)} smart chunks.")
     
     # 3. Create Emdeddings and store them in Vector DB
     print("Generating embeddings and saving to ChromaDB...")

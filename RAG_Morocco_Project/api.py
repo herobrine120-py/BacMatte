@@ -25,9 +25,12 @@ try:
     from slowapi.errors import RateLimitExceeded
     from starlette.requests import Request
     
-    # Bug fix: use X-Forwarded-For behind Render's proxy, fallback to client host
+    # Bug fix: use X-Forwarded-For behind Render's proxy. Render adds the real IP to the end of the chain.
     def get_real_ip(req: Request) -> str:
-        return req.headers.get("X-Forwarded-For", req.client.host if req.client else "127.0.0.1").split(",")[0]
+        forwarded = req.headers.get("X-Forwarded-For")
+        if forwarded:
+            return forwarded.split(",")[-1].strip()
+        return req.client.host if req.client else "127.0.0.1"
         
     limiter = Limiter(key_func=get_real_ip)
     RATE_LIMIT_ENABLED = True
@@ -52,11 +55,7 @@ DB_DIR = "./chroma_db_openai"
 async def lifespan(app: FastAPI):
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     app.state.db = Chroma(persist_directory=DB_DIR, embedding_function=embeddings)
-    # Bug 13 fix: Use MMR retrieval to avoid duplicate chunks
-    app.state.retriever = app.state.db.as_retriever(
-        search_type="mmr",
-        search_kwargs={"k": 4, "fetch_k": 20, "lambda_mult": 0.7}
-    )
+    # Retriever construction is moved to endpoints for dynamic metadata filtering
     # Bug 20 fix: Add timeout to LLM calls
     app.state.llm = ChatOpenAI(
         model="gpt-4o-mini",
@@ -76,19 +75,14 @@ if RATE_LIMIT_ENABLED:
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# ── Bug# ── CUSTOM CORS MIDDLEWARE (Bulletproof) ───────────────────────
-@app.middleware("http")
-async def add_cors_header(request: Request, call_next):
-    # Handle preflight OPTIONS requests directly
-    if request.method == "OPTIONS":
-        response = JSONResponse(content="OK")
-    else:
-        response = await call_next(request)
-    
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS, DELETE, PUT"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
-    return response
+# ── CUSTOM CORS MIDDLEWARE (Bulletproof) ───────────────────────
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://bacmatte.vercel.app", "http://localhost:5173", "http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ── GLOBAL EXCEPTION HANDLER (Ensures CORS on 500s) ───────────
 @app.exception_handler(Exception)
@@ -98,8 +92,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     traceback.print_exc()
     return JSONResponse(
         status_code=500,
-        content={"detail": "Internal Server Error", "msg": str(exc)},
-        headers={"Access-Control-Allow-Origin": "*"}
+        content={"detail": "Internal Server Error", "msg": str(exc)}
     )
 
 # ── Bug 9 fix: Pydantic with validators ────────────────────────
@@ -121,6 +114,14 @@ class ChatRequest(BaseModel):
         if len(v) > 3000:
             raise ValueError("Question too long (max 3000 characters)")
         return v.strip()
+
+    @field_validator("lesson", "subject")
+    @classmethod
+    def prevent_prompt_injection(cls, v: str) -> str:
+        if len(v) > 100:
+            v = v[:100]
+        # Strip dangerous characters that could break out of the prompt template
+        return v.replace("*", "").replace("\n", " ").replace(">", "").strip()
 
     @field_validator("mode")
     @classmethod
@@ -205,8 +206,16 @@ async def chat(request: Request, req: ChatRequest):
     if RATE_LIMIT_ENABLED:
         limiter._check_request_limit(request, chat, "20/minute")
 
-    retriever = request.app.state.retriever
+    db = request.app.state.db
     llm = request.app.state.llm
+
+    # ── Critical Fix: Dynamic Metadata Filtering ──
+    search_kwargs = {"k": 4, "fetch_k": 20, "lambda_mult": 0.7}
+    if req.subject:
+        # Strict enforcement: Only retrieve from the correct subject book
+        search_kwargs["filter"] = {"subject": req.subject}
+
+    retriever = db.as_retriever(search_type="mmr", search_kwargs=search_kwargs)
 
     system_prompt_str = build_system_prompt(req.mode, req.lesson, req.subject, req.level)
     prompt = ChatPromptTemplate.from_template(system_prompt_str)
@@ -278,9 +287,14 @@ async def health(request: Request):
 
 # ── BUG DEBUG ENDPOINT ──────────────────────────────────────────
 @app.get("/debug_rag")
-async def debug_rag(q: str):
+async def debug_rag(q: str, subject: str = None):
     try:
-        docs = app.state.retriever.invoke(q)
+        db = app.state.db
+        search_kwargs = {"k": 4, "fetch_k": 20, "lambda_mult": 0.7}
+        if subject:
+            search_kwargs["filter"] = {"subject": subject}
+        retriever = db.as_retriever(search_type="mmr", search_kwargs=search_kwargs)
+        docs = retriever.invoke(q)
         return {"query": q, "docs": [d.page_content for d in docs]}
     except Exception as e:
         return {"error": str(e)}
