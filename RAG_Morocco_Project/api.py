@@ -257,6 +257,10 @@ async def chat(request: Request, req: ChatRequest):
 
 
 # ── Bug 16 fix: Deep health check that verifies ChromaDB ──────
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "BacMatte AI RAG Backend is running perfectly!"}
+
 @app.get("/health")
 async def health(request: Request):
     try:
