@@ -44,6 +44,13 @@ export default function App() {
     setSubjectState(sj)
   }
 
+  // Auto-redirect if user returns from Google OAuth and is stuck on Auth page
+  useEffect(() => {
+    if (user && page === 'auth') {
+      setPage('select')
+    }
+  }, [user, page])
+
   // Protected Routes Logic
   let currentPage = page
   if (!user && (page === 'select' || page === 'tutor')) {
