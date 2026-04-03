@@ -17,14 +17,13 @@ export default function Navbar({ lang, setLang, setPage }) {
       </button>
 
       <div className="nav-center">
-        {/* These can be linked to landing sections if they exist, or keep as static links for now */}
-        <button className="nav-link" onClick={() => { const el = document.getElementById('features'); if(el) el.scrollIntoView({behavior:'smooth'}) }}>{t.features}</button>
-        <button className="nav-link" onClick={() => { const el = document.getElementById('pricing'); if(el) el.scrollIntoView({behavior:'smooth'}) }}>{t.pricing}</button>
+        <button className="nav-link" onClick={() => setPage('pricing')}>{t.pricing}</button>
+        <button className="nav-link" onClick={() => setPage('contact')}>{t.contact}</button>
       </div>
 
       <div className="nav-right">
         <div className="lang-sw">
-          {['ar', 'fr', 'en'].map(l => (
+          {['ar', 'fr'].map(l => (
             <button
               key={l}
               className={`lang-btn ${lang === l ? 'active' : ''}`}
@@ -36,9 +35,11 @@ export default function Navbar({ lang, setLang, setPage }) {
         </div>
         
         {user ? (
-          <button className="btn btn-outline" onClick={handleSignOut} style={{ borderColor: 'var(--red-light)', color: 'var(--red)' }}>
-            {t.signout || (lang === 'ar' ? 'تسجيل الخروج' : 'Déconnexion')}
-          </button>
+          <>
+            <button className="btn btn-outline" onClick={() => setPage('profile')} style={{ padding: '7px 11px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              👤 <span className="hide-mobile">{t.profile}</span>
+            </button>
+          </>
         ) : (
           <button className="btn btn-outline" onClick={() => setPage('auth')}>
             {t.signin}

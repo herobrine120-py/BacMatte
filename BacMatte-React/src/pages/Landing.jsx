@@ -103,36 +103,14 @@ export default function Landing({ lang, setPage, setLang }) {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section className="pricing-section">
+      {/* Pricing Teaser */}
+      <section className="pricing-section" id="pricing">
         <div className="sec-tag">{t.secTags.pricing}</div>
         <h2 className="sec-h">{t.secH.pricing[0]}<em>{t.secH.pricing[1]}</em></h2>
-        <div className="pricing-grid">
-          {/* Free */}
-          <div className="price-box">
-            <div className="price-tier">{t.pricing.free.tier}</div>
-            <div className="price-num">0 <sup>{t.pricing.free.cur}</sup></div>
-            <div className="price-per">{t.pricing.free.per}</div>
-            <ul className="price-list">
-              {t.pricing.free.items.map((item, i) => <li key={i}>{item}</li>)}
-            </ul>
-            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '11px' }} onClick={() => setPage('select')}>
-              {t.pricing.free.cta}
-            </button>
-          </div>
-          {/* Pro */}
-          <div className="price-box featured">
-            <div className="price-badge">{t.pricing.pro.badge}</div>
-            <div className="price-tier">{t.pricing.pro.tier}</div>
-            <div className="price-num">50 <sup>{t.pricing.pro.cur}</sup></div>
-            <div className="price-per">{t.pricing.pro.per}</div>
-            <ul className="price-list">
-              {t.pricing.pro.items.map((item, i) => <li key={i}>{item}</li>)}
-            </ul>
-            <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '14px' }} onClick={() => setPage('auth')}>
-              {t.pricing.pro.cta}
-            </button>
-          </div>
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <button className="btn btn-primary" onClick={() => setPage('pricing')} style={{ fontSize: '16px', padding: '14px 30px' }}>
+            {lang === 'ar' ? 'عرض باقات الأسعار' : 'Voir nos offres'}
+          </button>
         </div>
       </section>
 

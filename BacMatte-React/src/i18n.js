@@ -1,7 +1,7 @@
 export const translations = {
   ar: {
     dir: 'rtl',
-    nav: { features: 'المميزات', pricing: 'الأسعار', signin: 'دخول', start: 'ابدأ مجاناً', signout: 'خروج' },
+    nav: { features: 'المميزات', pricing: 'الأسعار', contact: 'اتصل بنا', signin: 'دخول', start: 'ابدأ مجاناً', signout: 'خروج', profile: 'حسابي' },
     hero: {
       badge: 'مخصص لطلاب البكالوريا بالمغرب · 1BAC & 2BAC',
       title1: 'مساعدك الذكي',
@@ -41,9 +41,33 @@ export const translations = {
       { ico: '✅', name: 'تصحيح', desc: 'تحليل إجابتك' },
       { ico: '📊', name: 'تقييم', desc: 'اختبر مستواك' },
     ],
-    pricing: {
-      free: { tier: 'مجاني', cur: 'د', per: 'للأبد', items: ['10 أسئلة يومياً', 'وضع الشرح فقط', 'مادتان'], cta: 'ابدأ مجاناً' },
-      pro: { badge: '⭐ الأكثر شعبية', tier: 'Pro', cur: 'د', per: 'شهرياً', items: ['أسئلة غير محدودة', 'جميع الأوضاع الخمسة', 'جميع المواد', 'تقرير أداء أسبوعي'], cta: 'اشترك الآن' },
+    pricingPage: {
+      title: 'اختر الباقة المناسبة لك',
+      sub: 'باقات مصممة لتناسب احتياجاتكم الدراسية',
+      free: { tier: 'مجاني', cur: 'DH', per: 'للأبد', items: ['10 أسئلة يومياً', 'وضع الشرح فقط', 'مادتان'], cta: 'ابدأ مجاناً' },
+      go: { tier: 'Go', cur: 'DH', per: 'شهرياً', items: ['50 سؤال يومياً', '3 أوضاع للتعلم', 'جميع المواد'], cta: 'قريباً' },
+      pro: { badge: '⭐ الأكثر شعبية', tier: 'Pro', cur: 'DH', per: 'شهرياً', items: ['أسئلة غير محدودة', 'جميع الأوضاع الخمسة', 'جميع المواد', 'تقرير أداء أسبوعي'], cta: 'قريباً' },
+      ultra: { tier: 'Ultra', cur: 'DH', per: 'شهرياً', items: ['باقة Pro+', 'دعم الأولوية', 'وصول تجريبي للميزات الجديدة', 'تخصيص الواجهة'], cta: 'قريباً' },
+    },
+    contact: {
+      title: 'اتصل بنا',
+      sub: 'نحن هنا لمساعدتك. أرسل لنا رسالة أو شكوى وسنرد في أقرب وقت.',
+      name: 'الاسم الكامل',
+      email: 'البريد الإلكتروني',
+      message: 'الرسالة / الشكوى',
+      submit: 'إرسال الرسالة',
+      success: 'تم إرسال رسالتك بنجاح. شكراً لتواصلك!',
+      error: 'حدث خطأ أثناء الإرسال. يرجى المحاولة لاحقاً.'
+    },
+    profile: {
+      title: 'حسابي',
+      sub: 'إدارة إعداداتك ومتابعة مستواك',
+      level: 'المستوى الدراسي الحالي',
+      plan: 'الباقة المفعّلة',
+      updateLevel: 'تحديث المستوى',
+      signOut: 'تسجيل الخروج',
+      statsTotal: 'إجمالي المحادثات',
+      statsMessages: 'الرسائل المرسلة'
     },
     footer: 'منصة تعليمية للطلاب المغاربة · 2025',
     select: {
@@ -85,7 +109,7 @@ export const translations = {
 
   fr: {
     dir: 'ltr',
-    nav: { features: 'Fonctionnalités', pricing: 'Tarifs', signin: 'Connexion', start: 'Commencer', signout: 'Déconnexion' },
+    nav: { features: 'Fonctionnalités', pricing: 'Tarifs', contact: 'Contact', signin: 'Connexion', start: 'Commencer', signout: 'Déconnexion', profile: 'Mon Profil' },
     hero: {
       badge: 'Conçu pour les lycéens marocains · 1BAC & 2BAC',
       title1: 'Ton assistant IA',
@@ -102,7 +126,7 @@ export const translations = {
       { n: '5', l: "Modes d'apprentissage" },
       { n: '12+', l: 'Matières scolaires' },
       { n: 'RAG', l: 'Lié à votre programme' },
-      { n: '50 MAD', l: 'Par mois seulement' },
+      { n: '50 DH', l: 'Par mois seulement' },
     ],
     secTags: { why: 'Pourquoi BacMatte', modes: "Modes d'apprentissage", pricing: 'Tarifs' },
     secH: {
@@ -113,10 +137,10 @@ export const translations = {
     features: [
       { ico: '📖', title: 'Explication par leçon', desc: 'Chaque réponse est liée à votre leçon spécifique via la technologie RAG.' },
       { ico: '🧮', title: 'Correction précise', desc: 'Analyse votre réponse étape par étape et détecte les erreurs conceptuelles.' },
-      { ico: '🇲🇦', title: 'Arabe + français', desc: 'Explications en arabe avec terminologie française, comme dans les examens.' },
-      { ico: '📊', title: 'Évaluation du niveau', desc: 'Tests intelligents qui évaluent votre compréhension et vos points faibles.' },
+      { ico: '🇲🇦', title: 'Arabe + français', desc: 'Explications en arabe avec terminologie française, comme l\'examen.' },
+      { ico: '📊', title: 'Évaluation du niveau', desc: 'Tests intelligents qui évaluent votre compréhension et vos faiblesses.' },
       { ico: '⚡', title: 'IA avancée', desc: 'Système IA avancé avec RAG pour garantir la précision des contenus.' },
-      { ico: '🔒', title: 'Programme officiel uniquement', desc: 'Contenu extrait exclusivement des programmes officiels marocains.' },
+      { ico: '🔒', title: 'Programme officiel', desc: 'Contenu extrait exclusivement des programmes officiels marocains.' },
     ],
     modeCards: [
       { ico: '💡', name: 'Expliquer', desc: 'Détaillé' },
@@ -125,9 +149,33 @@ export const translations = {
       { ico: '✅', name: 'Correction', desc: 'Analyser' },
       { ico: '📊', name: 'Évaluation', desc: 'Tester' },
     ],
-    pricing: {
-      free: { tier: 'Gratuit', cur: 'MAD', per: 'Pour toujours', items: ['10 questions/jour', 'Mode explication uniquement', 'Deux matières'], cta: 'Commencer' },
-      pro: { badge: '⭐ Le plus populaire', tier: 'Pro', cur: 'MAD', per: 'Par mois', items: ['Questions illimitées', 'Les cinq modes', 'Toutes les matières', 'Rapport hebdomadaire'], cta: "S'abonner" },
+    pricingPage: {
+      title: 'Choisissez votre formule',
+      sub: 'Des forfaits conçus pour s\'adapter à vos besoins d\'étude',
+      free: { tier: 'Gratuit', cur: 'DH', per: 'Pour toujours', items: ['10 questions/jour', 'Mode explication solely', 'Deux matières'], cta: 'Commencer' },
+      go: { tier: 'Go', cur: 'DH', per: 'Par mois', items: ['50 questions/jour', '3 modes', 'Toutes les matières'], cta: 'Bientôt' },
+      pro: { badge: '⭐ Populaire', tier: 'Pro', cur: 'DH', per: 'Par mois', items: ['Questions illimitées', 'Les cinq modes', 'Toutes les matières', 'Rapport hebdo'], cta: 'Bientôt' },
+      ultra: { tier: 'Ultra', cur: 'DH', per: 'Par mois', items: ['Offre Pro+', 'Support prioritaire', 'Accès avant-première', 'Thèmes personnalisés'], cta: 'Bientôt' },
+    },
+    contact: {
+      title: 'Contactez-nous',
+      sub: 'Nous sommes là pour vous aider. Envoyez-nous un message et nous vous répondrons.',
+      name: 'Nom complet',
+      email: 'Adresse e-mail',
+      message: 'Message / Réclamation',
+      submit: 'Envoyer',
+      success: 'Message envoyé avec succès. Merci!',
+      error: 'Une erreur est survenue. Veuillez réessayer.'
+    },
+    profile: {
+      title: 'Mon Profil',
+      sub: 'Gérer vos préférences et suivre votre progression',
+      level: 'Niveau actuel',
+      plan: 'Abonnement',
+      updateLevel: 'Mettre à jour le niveau',
+      signOut: 'Déconnexion',
+      statsTotal: 'Conversations',
+      statsMessages: 'Messages envoyés'
     },
     footer: 'Plateforme éducative pour lycéens marocains · 2025',
     select: {
@@ -165,91 +213,7 @@ export const translations = {
         { ico: '💬', title: 'Arabe + termes français', desc: 'Comme dans les examens officiels' },
       ],
     },
-  },
-
-  en: {
-    dir: 'ltr',
-    nav: { features: 'Features', pricing: 'Pricing', signin: 'Sign in', start: 'Get started', signout: 'Sign out' },
-    hero: {
-      badge: 'Built for Moroccan high school students · 1BAC & 2BAC',
-      title1: 'Your AI tutor',
-      title2: 'to ace the ',
-      titleAccent: 'Bac',
-      sub: 'Explanations, summaries, exercises and corrections — aligned with the official Moroccan curriculum.',
-      cta1: 'Start for free →',
-      cta2: 'Try the assistant',
-    },
-    mockup: { lessons: 'Lessons', typing: 'Typing...' },
-    mockItems: ["Newton's Laws", 'Mechanical Energy', 'Oscillations', 'Waves'],
-    modes: ['💡 Explain', '📋 Summary', '✏️ Exercises', '✅ Correction'],
-    stats: [
-      { n: '5', l: 'Learning modes' },
-      { n: '12+', l: 'School subjects' },
-      { n: 'RAG', l: 'Linked to your curriculum' },
-      { n: '50 MAD', l: 'Per month only' },
-    ],
-    secTags: { why: 'Why BacMatte', modes: 'Learning modes', pricing: 'Pricing' },
-    secH: {
-      why: ['An AI tutor, not ', 'just a chatbot'],
-      modes: ['Five modes, ', 'one for every need'],
-      pricing: ['Simple and ', 'accessible to all'],
-    },
-    features: [
-      { ico: '📖', title: 'Lesson-based answers', desc: 'Every answer is tied to your specific lesson from the official curriculum via RAG.' },
-      { ico: '🧮', title: 'Precise correction', desc: 'Analyses your answer step by step and detects all conceptual and calculation errors.' },
-      { ico: '🇲🇦', title: 'Arabic + French', desc: 'Arabic explanations with French terminology, just like in the official exams.' },
-      { ico: '📊', title: 'Level assessment', desc: 'Smart tests that assess understanding and identify weak points needing review.' },
-      { ico: '⚡', title: 'Advanced AI', desc: 'Advanced AI system with RAG to ensure curriculum accuracy.' },
-      { ico: '🔒', title: 'Official curriculum only', desc: 'Content sourced exclusively from official Moroccan secondary education curricula.' },
-    ],
-    modeCards: [
-      { ico: '💡', name: 'Explain', desc: 'In depth' },
-      { ico: '📋', name: 'Summary', desc: 'Condensed' },
-      { ico: '✏️', name: 'Exercises', desc: 'Progressive' },
-      { ico: '✅', name: 'Correction', desc: 'Analyse' },
-      { ico: '📊', name: 'Assessment', desc: 'Test level' },
-    ],
-    pricing: {
-      free: { tier: 'Free', cur: 'MAD', per: 'Forever', items: ['10 questions per day', 'Explanation mode only', 'Two subjects'], cta: 'Get started' },
-      pro: { badge: '⭐ Most popular', tier: 'Pro', cur: 'MAD', per: 'Per month', items: ['Unlimited questions', 'All five modes', 'All subjects', 'Weekly performance report'], cta: 'Subscribe now' },
-    },
-    footer: 'AI educational platform for Moroccan students · 2025',
-    select: {
-      title: 'Where do you start?', sub: 'Choose your level and subject',
-      step1: 'School level', step2: 'Subject',
-      levels: [{ n: '1', sub: 'BAC · First year of baccalaureate' }, { n: '2', sub: 'BAC · Second year of baccalaureate' }],
-      cta: 'Enter the assistant →', back: '← Home',
-      search: 'Search for a lesson...',
-    },
-    subjects: [
-      { ico: '📐', name: 'Mathematics', key: 'math', fr: 'Mathématiques' },
-      { ico: '⚛️', name: 'Physics & Chemistry', key: 'phys', fr: 'Physique-Chimie' },
-      { ico: '🧬', name: 'Life & Earth Sciences', key: 'svt', fr: 'SVT' },
-      { ico: '🧠', name: 'Philosophy', key: 'philo', fr: 'Philosophie' },
-      { ico: '🌍', name: 'History & Geography', key: 'hist', fr: 'Histoire-Géo' },
-      { ico: '📈', name: 'Economics', key: 'eco', fr: 'Économie' },
-    ],
-    tutor: {
-      modeBtns: ['💡 Explain', '📋 Summary', '✏️ Exercises', '✅ Correction', '📊 Assessment'],
-      modeKeys: ['sharh', 'talkhis', 'tamarin', 'tashih', 'taqyim'],
-      placeholder: 'Type your question here...',
-      quickBtns: ['Conservation law', 'Solved example', 'New exercise'],
-      userName: 'Ahmed',
-    },
-    auth: {
-      title: 'Welcome', sub: 'Sign in or create your account',
-      tab1: 'Sign in', tab2: 'Create account',
-      email: 'Email address', pass: 'Password', name: 'Full name',
-      submit1: 'Sign in', submit2: 'Create account',
-      or: 'or', google: '🔑 Google', back: '← Home',
-      headline: ['AI built for', 'your', 'Baccalaureate success'],
-      perks: [
-        { ico: '🎯', title: 'Official Moroccan curriculum', desc: 'Content from 1BAC and 2BAC syllabi' },
-        { ico: '🔬', title: 'Precise correction', desc: 'Step-by-step error analysis' },
-        { ico: '💬', title: 'Arabic + French terminology', desc: 'Just like in official exams' },
-      ],
-    },
-  },
+  }
 }
 
 export const LESSONS = {
@@ -298,27 +262,22 @@ export const getModeResponse = (mode, lessonAr, lessonFr, lang) => {
     sharh: {
       ar: `مرحباً! سأشرح لك درس <strong>${name}</strong> بالتفصيل.<br><br>سنبدأ بالمفاهيم الأساسية ثم العلاقات الرياضية مع أمثلة من منهج البكالوريا.<br><br>من أين تريد البدء؟ 📚`,
       fr: `Bonjour ! Je vais vous expliquer <strong>${name}</strong> en détail.<br><br>Commençons par les concepts fondamentaux puis les relations mathématiques. Par où souhaitez-vous commencer ? 📚`,
-      en: `Hello! I'll explain <strong>${name}</strong> in detail.<br><br>We'll start with core concepts then mathematical relations. Where would you like to begin? 📚`,
     },
     talkhis: {
       ar: `📋 <strong>ملخص: ${name}</strong><br><br>✦ <span class="trm">المفاهيم الأساسية</span><br>✦ <span class="trm">العلاقات الرياضية</span><br>✦ <span class="trm">الحالات الخاصة</span><br>✦ <span class="trm">تطبيقات البكالوريا</span><br><br>اكتب <strong>"ابدأ"</strong> للملخص الكامل.`,
       fr: `📋 <strong>Résumé : ${name}</strong><br><br>✦ <span class="trm">Concepts fondamentaux</span><br>✦ <span class="trm">Relations mathématiques</span><br>✦ <span class="trm">Cas particuliers</span><br>✦ <span class="trm">Applications bac</span><br><br>Écrivez <strong>"commencer"</strong>.`,
-      en: `📋 <strong>Summary: ${name}</strong><br><br>✦ <span class="trm">Core concepts</span><br>✦ <span class="trm">Mathematical relations</span><br>✦ <span class="trm">Special cases</span><br>✦ <span class="trm">Bac applications</span><br><br>Type <strong>"start"</strong>.`,
     },
     tamarin: {
       ar: `✏️ <strong>تمرين: ${name}</strong><br><br>جسم كتلته <span class="tfrm">m = 2 kg</span> بسرعة <span class="tfrm">v = 4 m/s</span> على ارتفاع <span class="tfrm">h = 5 m</span><br><br><strong>المطلوب:</strong><ul><li>احسب Ec و Ep</li><li>أوجد Em</li><li>هل Em منحفظة؟</li></ul><br>أرسل حلّك 🎯`,
       fr: `✏️ <strong>Exercice : ${name}</strong><br><br>Un objet de <span class="tfrm">m = 2 kg</span>, vitesse <span class="tfrm">v = 4 m/s</span>, hauteur <span class="tfrm">h = 5 m</span><br><br><strong>Calculer :</strong><ul><li>Ec et Ep</li><li>Em l'énergie mécanique</li><li>Em est-elle conservée ?</li></ul>`,
-      en: `✏️ <strong>Exercise: ${name}</strong><br><br>An object of <span class="tfrm">m = 2 kg</span>, speed <span class="tfrm">v = 4 m/s</span>, height <span class="tfrm">h = 5 m</span><br><br><strong>Calculate:</strong><ul><li>Ec and Ep</li><li>Em mechanical energy</li><li>Is Em conserved?</li></ul>`,
     },
     tashih: {
       ar: `✅ <strong>وضع التصحيح</strong><br><br>أرسل حلّك وسأحلل:<br><ul><li>الأخطاء المفاهيمية</li><li>الأخطاء الحسابية</li><li>الحل الصحيح خطوة بخطوة</li></ul>`,
       fr: `✅ <strong>Mode correction</strong><br><br>Envoyez votre réponse et j'analyserai :<br><ul><li>Les erreurs conceptuelles</li><li>Les erreurs de calcul</li><li>La solution correcte</li></ul>`,
-      en: `✅ <strong>Correction mode</strong><br><br>Send your answer and I'll analyse:<br><ul><li>Conceptual errors</li><li>Calculation errors</li><li>The correct solution</li></ul>`,
     },
     taqyim: {
       ar: `📊 <strong>تقييم المستوى</strong><br><br>سأطرح <strong>5 أسئلة</strong> بمستويات متصاعدة — النتيجة من 20.<br><br>اكتب <strong>"ابدأ"</strong> 🚀`,
       fr: `📊 <strong>Évaluation du niveau</strong><br><br><strong>5 questions</strong> de difficulté croissante — note sur 20.<br><br>Écrivez <strong>"commencer"</strong> 🚀`,
-      en: `📊 <strong>Level assessment</strong><br><br><strong>5 questions</strong> of increasing difficulty — scored out of 20.<br><br>Type <strong>"start"</strong> 🚀`,
     },
   }
   return responses[mode]?.[lang] ?? responses.sharh[lang]

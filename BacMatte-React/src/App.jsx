@@ -4,6 +4,9 @@ import Landing from './pages/Landing'
 import Select from './pages/Select'
 import Tutor from './pages/Tutor'
 import Auth from './pages/Auth'
+import Pricing from './pages/Pricing'
+import Contact from './pages/Contact'
+import Profile from './pages/Profile'
 import { useAuth } from './context/AuthContext'
 
 export default function App() {
@@ -27,7 +30,7 @@ export default function App() {
 
   // Apply lang/dir to document
   useEffect(() => {
-    document.body.classList.remove('ar', 'fr', 'en')
+    document.body.classList.remove('ar', 'fr')
     document.body.classList.add(lang)
     document.documentElement.lang = lang
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
@@ -53,11 +56,11 @@ export default function App() {
 
   // Protected Routes Logic
   let currentPage = page
-  if (!user && (page === 'select' || page === 'tutor')) {
+  if (!user && (page === 'select' || page === 'tutor' || page === 'profile')) {
     currentPage = 'auth'
   }
 
-  const showNav = currentPage !== 'tutor'
+  const showNav = currentPage !== 'tutor' && currentPage !== 'auth'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -76,6 +79,15 @@ export default function App() {
       )}
       {currentPage === 'auth' && (
         <Auth lang={lang} setPage={setPage} />
+      )}
+      {currentPage === 'pricing' && (
+        <Pricing lang={lang} setPage={setPage} />
+      )}
+      {currentPage === 'contact' && (
+        <Contact lang={lang} setPage={setPage} />
+      )}
+      {currentPage === 'profile' && (
+        <Profile lang={lang} setPage={setPage} />
       )}
     </div>
   )

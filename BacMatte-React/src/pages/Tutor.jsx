@@ -205,10 +205,17 @@ export default function Tutor({ lang, setPage, level, subject }) {
 
     let accumulated = ''
 
+    let token = null
+    if (user) {
+        const { data: sessionData } = await supabase.auth.getSession()
+        token = sessionData?.session?.access_token
+    }
+
     sendChat(
       { question, lesson: lessonLabel, subject: subjectLabel, level: rightLevel, mode },
-      (token) => {
-        accumulated += token
+      token,
+      (tokenChunk) => {
+        accumulated += tokenChunk
         setStreaming(accumulated)
       },
       async () => {

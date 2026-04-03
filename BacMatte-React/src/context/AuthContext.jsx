@@ -10,20 +10,29 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     // 1. Get initial active session if it exists on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
+      fetchUserProfile(session?.user ?? null)
     })
 
     // 2. Listen to all auth events (login, logout, token refresh, etc.)
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
+      fetchUserProfile(session?.user ?? null)
     })
 
     return () => {
       listener.subscription.unsubscribe()
     }
   }, [])
+
+  const fetchUserProfile = async (authUser) => {
+    if (!authUser) {
+      setUser(null)
+      setLoading(false)
+      return
+    }
+    const { data } = await supabase.from('profiles').select('level, plan, full_name').eq('id', authUser.id).single()
+    setUser({ ...authUser, profile: data || {} })
+    setLoading(false)
+  }
 
   const value = {
     user,

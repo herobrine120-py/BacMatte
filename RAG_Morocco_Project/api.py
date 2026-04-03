@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel, field_validator
 from dotenv import load_dotenv
+from supabase import create_client, Client
 
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 try:
@@ -40,13 +41,16 @@ except ImportError:
 
 load_dotenv()
 
-# ── Bug 4 fix: Validate API key on startup, not lazily ────────
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
+SUPABASE_URL = os.getenv("VITE_SUPABASE_URL")
+SUPABASE_KEY = os.getenv("VITE_SUPABASE_ANON_KEY")
+
+if not OPENAI_API_KEY or not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError(
-        "OPENAI_API_KEY is missing from .env file. Cannot start server.\n"
-        "Create RAG_Morocco_Project/.env with: OPENAI_API_KEY=sk-..."
+        "Missing required environment variables (OPENAI_API_KEY, VITE_SUPABASE_URL, or VITE_SUPABASE_ANON_KEY)."
     )
+
+supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 DB_DIR = "./chroma_db_openai"
 
@@ -199,9 +203,23 @@ def get_cache_key(question: str, subject: str, lesson: str, mode: str) -> str:
     return hashlib.md5(content.encode()).hexdigest()
 
 
+# ── Security verification ─────────────────────────────────────
+async def verify_auth_token(request: Request):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+    token = auth_header.split(" ")[1]
+    user_response = supabase_client.auth.get_user(token)
+    if not user_response or not user_response.user:
+        raise HTTPException(status_code=401, detail="Invalid session token")
+    return user_response.user
+
 # ── Streaming chat endpoint ───────────────────────────────────
 @app.post("/chat")
 async def chat(request: Request, req: ChatRequest):
+    # Enforce Authentication
+    user = await verify_auth_token(request)
+
     # Rate limit: 20 req/min per IP (if slowapi installed)
     if RATE_LIMIT_ENABLED:
         limiter._check_request_limit(request, chat, "20/minute")
@@ -287,21 +305,6 @@ async def health(request: Request):
             status_code=503,
             content={"status": "error", "reason": str(e)}
         )
-
-
-# ── BUG DEBUG ENDPOINT ──────────────────────────────────────────
-@app.get("/debug_rag")
-async def debug_rag(q: str, subject: str = None):
-    try:
-        db = app.state.db
-        search_kwargs = {"k": 4, "fetch_k": 20, "lambda_mult": 0.7}
-        if subject:
-            search_kwargs["filter"] = {"subject": subject}
-        retriever = db.as_retriever(search_type="mmr", search_kwargs=search_kwargs)
-        docs = retriever.invoke(q)
-        return {"query": q, "docs": [d.page_content for d in docs]}
-    except Exception as e:
-        return {"error": str(e)}
 
 if __name__ == "__main__":
     import uvicorn

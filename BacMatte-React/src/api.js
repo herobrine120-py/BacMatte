@@ -4,16 +4,20 @@ export const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 
 /**
  * sendChat — streams an AI response token by token.
  * @param {object} payload - { question, lesson, subject, level, mode }
+ * @param {string} token - The user's JWT access token
  * @param {function} onToken - called with each text chunk
  * @param {function} onDone  - called when stream ends
  * @param {function} onError - called on network/api error
  * @param {AbortSignal} signal - signal to cancel request
  */
-export async function sendChat(payload, onToken, onDone, onError, signal) {
+export async function sendChat(payload, token, onToken, onDone, onError, signal) {
   try {
     const res = await fetch(`${BASE_URL}/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify(payload),
       signal,
     })
