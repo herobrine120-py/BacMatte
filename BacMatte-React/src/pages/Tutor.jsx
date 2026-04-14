@@ -78,6 +78,8 @@ export default function Tutor({ lang, setPage, level, subject }) {
 
   // Core state
   const [activeLesson, setActiveLesson] = useState(lessons.find(l => l.active) || lessons[0])
+  const [imageFile, setImageFile] = useState(null)
+  const fileInputRef = useRef(null)
   const [activeMode, setActiveMode] = useState(0)
   const [messages, setMessages] = useState([])
   const [streaming, setStreaming] = useState('')   // token accumulator while streaming
@@ -157,16 +159,17 @@ export default function Tutor({ lang, setPage, level, subject }) {
   }, [messages, streaming, isStreaming])
 
   // ── Core: send a message to the RAG API ────────────────────
-  const askRAG = useCallback(async (question, modeOverride) => {
-    if (!question.trim()) return
+  const askRAG = useCallback(async (question, modeOverride, customDbQuestion = null, customImgBase64 = null) => {
+    if (!question.trim() && !customImgBase64) return
     const mode = modeOverride || modeKeys[activeMode]
     const lessonLabel = `${activeLesson.fr} - ${activeLesson.ar}`
     const subjectLabel = subject?.fr || 'Physique-Chimie'
+    const actualDbContent = customDbQuestion || question
 
     abortActiveStream()
     abortControllerRef.current = new AbortController()
 
-    setMessages(prev => [...prev, { role: 'user', content: question, id: `u-${Date.now()}` }])
+    setMessages(prev => [...prev, { role: 'user', content: actualDbContent, id: `u-${Date.now()}` }])
     setStreaming('')
     setIsStreaming(true)
 
@@ -178,7 +181,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
         .from('chat_sessions')
         .insert({
           user_id: user.id,
-          title: question.substring(0, 40) + (question.length > 40 ? '...' : ''),
+          title: question ? question.substring(0, 40) + (question.length > 40 ? '...' : '') : 'Image Query',
           subject: subjectLabel,
           lesson: lessonLabel
         })
@@ -196,7 +199,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
     if (currentSessionId && user) {
       try {
         await supabase.from('chat_messages').insert({
-          session_id: currentSessionId, role: 'user', content: question
+          session_id: currentSessionId, role: 'user', content: actualDbContent
         })
       } catch (err) {
         console.error('Failed to save user message:', err)
@@ -212,7 +215,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
     }
 
     sendChat(
-      { question, lesson: lessonLabel, subject: subjectLabel, level: rightLevel, mode, session_id: currentSessionId },
+      { question, lesson: lessonLabel, subject: subjectLabel, level: rightLevel, mode, session_id: currentSessionId, image_base64: customImgBase64 },
       token,
       (tokenChunk) => {
         accumulated += tokenChunk
@@ -250,9 +253,34 @@ export default function Tutor({ lang, setPage, level, subject }) {
 
   const sendMessage = (text) => {
     if (isStreaming) return
+    if (!text.trim() && !imageFile) return
+    
     setInput('')
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
-    askRAG(text)
+    
+    let dbContent = text
+    if (imageFile) {
+        dbContent += '\n\n[صورة مرفقة 🖼️]'
+    }
+    
+    askRAG(text, null, dbContent, imageFile)
+    setImageFile(null)
+  }
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      alert(lang === 'ar' ? 'الرجاء اختيار صورة صالحة' : 'Veuillez sélectionner une image valide')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (evt) => {
+      setImageFile(evt.target.result)
+    }
+    reader.readAsDataURL(file)
   }
 
   const switchLesson = (lesson) => {
@@ -412,7 +440,14 @@ export default function Tutor({ lang, setPage, level, subject }) {
 
         {/* Input bar */}
         <div className="t-inputbar">
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, position: 'relative' }}>
+            {imageFile && (
+              <div style={{ padding: '8px 12px', background: 'var(--bg3)', borderRadius: '8px', marginBottom: '8px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <img src={imageFile} alt="Preview" style={{ height: '40px', borderRadius: '4px', objectFit: 'cover' }} />
+                <span style={{ fontSize: '12px', color: 'var(--text2)' }}>{lang === 'ar' ? 'تم إرفاق صورة' : 'Image jointe'}</span>
+                <button onClick={() => setImageFile(null)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--red)', opacity: 0.8 }} title="Remove image">✖</button>
+              </div>
+            )}
             <textarea
               ref={textareaRef} className="t-textarea" rows={1}
               placeholder={isStreaming ? (lang === 'ar' ? '...BacMatte يكتب' : 'BacMatte est en train de répondre...') : (t.tutor?.placeholder || 'اطرح سؤالك عن هذا الدرس…')}
@@ -420,12 +455,13 @@ export default function Tutor({ lang, setPage, level, subject }) {
               onKeyDown={handleKey} onInput={autoResize} disabled={isStreaming}
             />
             <div className="t-inputbar-actions">
-              <button className="t-attach-btn" disabled>📎 {lang === 'ar' ? 'مرفق' : 'Attach'}</button>
+              <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageUpload} style={{ display: 'none' }} />
+              <button className="t-attach-btn" onClick={() => fileInputRef.current.click()} disabled={isStreaming}>📎 {lang === 'ar' ? 'مرفق' : 'Attach'}</button>
               <button className="t-prompt-btn" onClick={() => useTemplate(TEMPLATES[0])}>💡 {lang === 'ar' ? 'قوالب' : 'Browse Prompts'}</button>
               <span className="t-charcount">{input.length} / 3,000</span>
             </div>
           </div>
-          <button className="t-send-btn" onClick={() => sendMessage(input)} disabled={isStreaming || !input.trim()}>↑</button>
+          <button className="t-send-btn" onClick={() => sendMessage(input)} disabled={isStreaming || (!input.trim() && !imageFile)}>↑</button>
         </div>
       </div>
 

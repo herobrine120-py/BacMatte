@@ -111,6 +111,7 @@ class ChatRequest(BaseModel):
     level: str = "2BAC"
     mode: str = "chat"
     session_id: str | None = None
+    image_base64: str | None = None
 
     @field_validator("question")
     @classmethod
@@ -257,16 +258,25 @@ async def chat(request: Request, req: ChatRequest):
     prompt = ChatPromptTemplate.from_messages([
         ("system", system_prompt_str),
         MessagesPlaceholder(variable_name="history"),
-        ("human", "{question}")
+        MessagesPlaceholder(variable_name="query_msg")
     ])
 
     def format_docs(docs):
         return "\n\n---\n\n".join(doc.page_content for doc in docs)
 
+    # dynamically construct the human message to support optional images
+    if req.image_base64:
+        query_msg = [HumanMessage(content=[
+            {"type": "text", "text": req.question},
+            {"type": "image_url", "image_url": {"url": req.image_base64}}
+        ])]
+    else:
+        query_msg = [HumanMessage(content=req.question)]
+
     # We manually trigger retriever here so we can pass 'context' along with history and question
     chain = (
         RunnablePassthrough.assign(
-            context=lambda x: format_docs(retriever.invoke(x["question"]))
+            context=lambda x: format_docs(retriever.invoke(req.question))
         )
         | prompt
         | llm
@@ -277,7 +287,7 @@ async def chat(request: Request, req: ChatRequest):
         try:
             # Bug 20 fix: timeout wrapper on the full streaming call
             async def _stream():
-                async for chunk in chain.astream({"question": req.question, "history": history_msgs}):
+                async for chunk in chain.astream({"query_msg": query_msg, "history": history_msgs}):
                     yield f"data: {json.dumps({'token': chunk})}\n\n"
 
             async for event in _stream():
@@ -285,6 +295,8 @@ async def chat(request: Request, req: ChatRequest):
         except asyncio.TimeoutError:
             yield f"data: {json.dumps({'error': 'Request timed out after 45s. Please try again.'})}\n\n"
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
         yield "data: [DONE]\n\n"
 
