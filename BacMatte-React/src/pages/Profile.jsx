@@ -1,16 +1,51 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { translations } from '../i18n'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../supabase'
+import { User, BookOpen, Clock, Settings, LogOut, ChevronLeft, ChevronRight, Sparkles, Activity } from 'lucide-react'
 
 export default function Profile({ lang, setPage }) {
   const t = translations[lang]
-  const pt = t.profile
+  const pt = t.profile || {}
   const { user } = useAuth()
   
   const [level, setLevel] = useState(user?.profile?.level || '2BAC')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  
+  const [sessions, setSessions] = useState([])
+  const [totalSessions, setTotalSessions] = useState(0)
+
+  useEffect(() => {
+    if (user) {
+      fetchHistory()
+    }
+  }, [user])
+
+  const fetchHistory = async () => {
+    try {
+      // Get recent 5
+      const { data, error } = await supabase
+        .from('chat_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false })
+        .limit(5)
+      
+      if (data) setSessions(data)
+
+      // Get total count
+      const { count } = await supabase
+        .from('chat_sessions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+      
+      if (count !== null) setTotalSessions(count)
+
+    } catch (err) {
+      console.error('Error fetching history:', err)
+    }
+  }
 
   const handleUpdate = async () => {
     setLoading(true)
@@ -36,52 +71,140 @@ export default function Profile({ lang, setPage }) {
     setPage('landing')
   }
 
+  const getPlanBadge = () => {
+    const p = user?.profile?.plan
+    if (p === 'pro') return 'Pro ⭐️'
+    if (p === 'go') return 'Go 🚀'
+    if (p === 'ultra') return 'Ultra 💎'
+    return 'Free'
+  }
+
+  // Formatting date
+  const formatDate = (ds) => {
+    if (!ds) return ''
+    const d = new Date(ds)
+    return new Intl.DateTimeFormat(lang === 'ar' ? 'ar-MA' : 'fr-FR', {
+      month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'
+    }).format(d)
+  }
+
+  const DirArrow = lang === 'ar' ? ChevronLeft : ChevronRight;
+
   return (
-    <div className="auth-page">
-      <div className="auth-shell" style={{ display: 'block', maxWidth: '600px', margin: '0 auto' }}>
-        <div className="auth-right">
-          <h2>{pt.title}</h2>
-          <p>{pt.sub}</p>
-
-          <div style={{ marginTop: '20px', padding: '20px', background: 'var(--bg2)', borderRadius: '12px' }}>
-            <h3 style={{ fontSize: '18px', marginBottom: '10px' }}>{user?.user_metadata?.full_name || 'طالب BAC'}</h3>
-            <p style={{ color: 'var(--text2)', fontSize: '14px', marginBottom: '20px' }}>{user?.email}</p>
-
-            <div className="form-group">
-              <label className="form-label">{pt.plan}</label>
-              <div style={{ display: 'inline-block', padding: '6px 12px', background: 'var(--accent-bg)', color: 'var(--accent)', borderRadius: '20px', fontSize: '13px', fontWeight: '600' }}>
-                {user?.profile?.plan === 'pro' ? 'Pro ⭐️' : user?.profile?.plan === 'go' ? 'Go 🚀' : user?.profile?.plan === 'ultra' ? 'Ultra 💎' : 'Free'}
-              </div>
-            </div>
-
-            <div className="form-group" style={{ marginTop: '20px' }}>
-              <label className="form-label">{pt.level}</label>
-              <select className="form-input" value={level} onChange={(e) => setLevel(e.target.value)}>
-                <option value="1BAC">1BAC (السنة الأولى)</option>
-                <option value="2BAC">2BAC (السنة الثانية)</option>
-              </select>
-            </div>
-
-            {success && (
-              <div style={{ color: '#28c840', fontSize: '13px', marginBottom: '10px' }}>✅ تم التحديث بنجاح</div>
-            )}
-
-            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-              <button className="btn btn-primary" onClick={handleUpdate} disabled={loading}>
-                {loading ? '...' : pt.updateLevel}
-              </button>
-            </div>
+    <div className="dash-page">
+      <div className="dash-shell">
+        
+        {/* Header */}
+        <div className="dash-header">
+          <div>
+            <h1>{pt.title || (lang === 'ar' ? 'لوحة التحكم' : 'Tableau de bord')}</h1>
+            <p>{pt.sub || (lang === 'ar' ? 'مرحباً، تابع تفوقك الدراسي من هنا.' : 'Bienvenue, suivez votre activité éducative.')}</p>
           </div>
-
-          <div style={{ marginTop: '30px', borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
-            <button className="btn btn-outline" onClick={handleSignOut} style={{ color: 'var(--red)', borderColor: 'var(--red-light)' }}>
-              {pt.signOut}
+          <div className="dash-actions">
+            <button className="btn btn-outline" onClick={() => setPage('select')}>
+              {t.select?.back || (lang === 'ar' ? 'عودة للدروس' : 'Retour aux cours')}
             </button>
           </div>
+        </div>
 
-          <div className="sel-back" style={{ marginTop: '30px' }}>
-            <button onClick={() => setPage('landing')}>{t.select.back}</button>
+        <div className="dash-grid">
+          
+          {/* Stats Bar */}
+          <div className="dc-stats">
+            <div className="stat-item">
+              <div className="stat-lbl">{lang === 'ar' ? 'جلسات الدراسة' : 'Sessions d\'étude'}</div>
+              <div className="stat-val"><Activity className="stat-icon" size={24} /> {totalSessions}</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-lbl">{lang === 'ar' ? 'الباقة الحالية' : 'Plan actuel'}</div>
+              <div className="stat-val"><Sparkles className="stat-icon" size={24} /> <span style={{ fontSize: '20px' }}>{getPlanBadge()}</span></div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-lbl">{lang === 'ar' ? 'المستوى الدراسي' : 'Niveau'}</div>
+              <div className="stat-val"><BookOpen className="stat-icon" size={24} /> {user?.profile?.level || 'BAC'}</div>
+            </div>
           </div>
+
+          {/* Recent History */}
+          <div className="dash-card dc-history">
+            <div className="dash-card-title">
+              <Clock size={20} className="text-text2" style={{color: 'var(--text2)'}} />
+              {lang === 'ar' ? 'النشاط الأخير' : 'Activité récente'}
+            </div>
+            
+            {sessions.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text3)' }}>
+                {lang === 'ar' ? 'لم تقم بأي جلسة دراسية بعد. اختر درساً وابدأ الآن!' : 'Aucune session d\'étude pour le moment.'}
+                <br/>
+                <button className="btn btn-primary" style={{ marginTop: '15px' }} onClick={() => setPage('select')}>
+                  {t.hero?.startBtn || (lang === 'ar' ? 'ابدأ الآن' : 'Commencer')}
+                </button>
+              </div>
+            ) : (
+              <div className="recent-list">
+                {sessions.map(s => (
+                  <div key={s.id} className="recent-item" onClick={() => setPage('tutor')} title="ملاحظة: النقر سيوجهك للبوت لمتابعة آخر درس">
+                    <div className="ri-info">
+                      <div className="ri-title">{s.lesson || (lang === 'ar' ? 'درس غير محدد' : 'Leçon non spécifiée')}</div>
+                      <div className="ri-meta">
+                        <span className="ri-chip">{s.subject || (lang === 'ar' ? 'مادة' : 'Sujet')}</span>
+                        <span>{formatDate(s.updated_at || s.created_at)}</span>
+                      </div>
+                    </div>
+                    <DirArrow size={20} className="ri-arrow" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Settings */}
+          <div className="dash-card dc-settings">
+            <div className="dash-card-title">
+              <Settings size={20} className="text-text2" style={{color: 'var(--text2)'}} />
+              {lang === 'ar' ? 'الإعدادات' : 'Paramètres'}
+            </div>
+            
+            <div className="dash-settings-group">
+              <div className="form-group">
+                <label className="form-label">{lang === 'ar' ? 'الاسم الكامل' : 'Nom complet'}</label>
+                <div style={{ padding: '10px 14px', background: 'var(--bg3)', borderRadius: '8px', fontSize: '14px', color: 'var(--text)' }}>
+                  {user?.user_metadata?.full_name || 'طالب BAC'}
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">{pt.level || 'المستوى'}</label>
+                <select className="form-input" value={level} onChange={(e) => setLevel(e.target.value)}>
+                  <option value="1BAC">1BAC (السنة الأولى)</option>
+                  <option value="2BAC">2BAC (السنة الثانية)</option>
+                </select>
+              </div>
+
+              {success && (
+                <div style={{ color: '#28c840', fontSize: '13px' }}>✅ {lang === 'ar' ? 'تم التحديث بنجاح' : 'Mise à jour réussie'}</div>
+              )}
+
+              <button className="btn btn-primary" onClick={handleUpdate} disabled={loading} style={{ width: '100%', justifyContent: 'center' }}>
+                {loading ? '...' : (pt.updateLevel || (lang === 'ar' ? 'تحديث المستوى' : 'Mettre à jour'))}
+              </button>
+
+              {(user?.profile?.plan === 'free' || !user?.profile?.plan) && (
+                <button className="btn btn-primary" onClick={() => setPage('pricing')} style={{ width: '100%', justifyContent: 'center', background: 'linear-gradient(135deg, var(--accent), #e05e1b)', border: 'none' }}>
+                  <Sparkles size={16} style={{ display: 'inline', marginRight: '6px' }}/> 
+                  {lang === 'ar' ? 'ترقية حسابي' : 'Mettre à niveau'}
+                </button>
+              )}
+
+              <div style={{ borderTop: '1px solid var(--border)', marginTop: '8px', paddingTop: '16px' }}>
+                <button className="btn btn-outline dash-btn-logout" onClick={handleSignOut} style={{ justifyContent: 'center' }}>
+                  <LogOut size={16} style={{marginRight: lang === 'fr' ? '6px' : '0', marginLeft: lang === 'ar' ? '6px' : '0'}} /> {pt.signOut || (lang === 'ar' ? 'تسجيل الخروج' : 'Déconnexion')}
+                </button>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
