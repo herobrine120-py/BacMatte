@@ -212,7 +212,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
     }
 
     sendChat(
-      { question, lesson: lessonLabel, subject: subjectLabel, level: rightLevel, mode },
+      { question, lesson: lessonLabel, subject: subjectLabel, level: rightLevel, mode, session_id: currentSessionId },
       token,
       (tokenChunk) => {
         accumulated += tokenChunk

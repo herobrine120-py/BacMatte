@@ -16,7 +16,8 @@ try:
     from langchain_chroma import Chroma
 except ImportError:
     from langchain_community.vectorstores import Chroma
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
@@ -109,6 +110,7 @@ class ChatRequest(BaseModel):
     subject: str = ""
     level: str = "2BAC"
     mode: str = "chat"
+    session_id: str | None = None
 
     @field_validator("question")
     @classmethod
@@ -149,7 +151,11 @@ def build_system_prompt(mode: str, lesson: str, subject: str, level: str) -> str
 3. **التجاوب المرن**: إذا كان سؤال الطالب يخص درساً مختلفاً عن ({lesson})، أجب على سؤاله بشكل طبيعي ولا تجبر الإجابة على العودة للدرس القديم.
 4. **تجنب المواضيع الخارجية**: إذا سألك الطالب عن مواضيع لا علاقة لها بالدراسة، اطلب منه التركيز على المنهج بلطف.
 
-5. **تنسيق الإجابة**:
+5. **التفكير التسلسلي الدقيق (Chain-of-Thought)**: 
+   - عند حل مسألة رياضية أو فيزيائية، قم دائماً بتحليل المعطيات خطوة بخطوة قبل إعطاء الاستنتاج النهائي. 
+   - لا تتخطى خطوات الحساب البسيطة لتجنب الأخطاء.
+
+6. **تنسيق الإجابة**:
    - أجب باللغة العربية الواضحة.
    - أدرج المصطلحات العلمية بالفرنسية بين قوسين.
    - اكتب المعادلات بصيغة LaTeX دائماً بين $ للمعادلات الصغيرة و $$ للمعادلات الكبيرة.
@@ -157,9 +163,6 @@ def build_system_prompt(mode: str, lesson: str, subject: str, level: str) -> str
 
 ## المحتوى المسترجع من الكتب المدرسية (RAG):
 {{context}}
-
-## سؤال/طلب الطالب:
-{{question}}
 """
     mode_instructions = {
         "explain": """
@@ -235,14 +238,36 @@ async def chat(request: Request, req: ChatRequest):
 
     retriever = db.as_retriever(search_type="mmr", search_kwargs=search_kwargs)
 
+    # ── Fetch history from Supabase if session_id is provided ──
+    history_msgs = []
+    if req.session_id:
+        try:
+            # Get last 6 messages to provide conversational context without exhausting tokens
+            res = supabase_client.table("chat_messages").select("*").eq("session_id", req.session_id).order("created_at", desc=True).limit(6).execute()
+            if res.data:
+                for row in reversed(res.data):
+                    if row["role"] == "user":
+                        history_msgs.append(HumanMessage(content=row["content"]))
+                    elif row["role"] == "ai":
+                        history_msgs.append(AIMessage(content=row["content"]))
+        except Exception as e:
+            print("Error fetching chat history:", e)
+
     system_prompt_str = build_system_prompt(req.mode, req.lesson, req.subject, req.level)
-    prompt = ChatPromptTemplate.from_template(system_prompt_str)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", system_prompt_str),
+        MessagesPlaceholder(variable_name="history"),
+        ("human", "{question}")
+    ])
 
     def format_docs(docs):
         return "\n\n---\n\n".join(doc.page_content for doc in docs)
 
+    # We manually trigger retriever here so we can pass 'context' along with history and question
     chain = (
-        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        RunnablePassthrough.assign(
+            context=lambda x: format_docs(retriever.invoke(x["question"]))
+        )
         | prompt
         | llm
         | StrOutputParser()
@@ -252,7 +277,7 @@ async def chat(request: Request, req: ChatRequest):
         try:
             # Bug 20 fix: timeout wrapper on the full streaming call
             async def _stream():
-                async for chunk in chain.astream(req.question):
+                async for chunk in chain.astream({"question": req.question, "history": history_msgs}):
                     yield f"data: {json.dumps({'token': chunk})}\n\n"
 
             async for event in _stream():

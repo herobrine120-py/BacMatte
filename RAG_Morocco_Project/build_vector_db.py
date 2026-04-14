@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 # Langchain imports
 from langchain_community.document_loaders import TextLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter, MarkdownHeaderTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 
@@ -41,14 +41,31 @@ def ingest_markdowns(md_dir_path):
         # Use filename prefix as lesson identifier
         doc.metadata["lesson"] = filename.replace("_gemini_extracted.md", "").replace(".md", "")
     
-    # 2. Split the markdown into chunks
-    # Bug Fix: larger chunks (1000 tokens) to avoid cutting math equations in half
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
+    # 2. Split the markdown into chunks using Markdown-aware splitting
+    headers_to_split_on = [
+        ("#", "Header 1"),
+        ("##", "Header 2"),
+        ("###", "Header 3"),
+    ]
+    markdown_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on)
+    
+    # Fallback recursive splitter for very long sections under a single header
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1200,
         chunk_overlap=200,
         separators=["\n\n", "\n", " ", ""]
     )
-    docs = splitter.split_documents(documents)
+    
+    docs = []
+    for doc in documents:
+        # Split by headers first
+        md_header_splits = markdown_splitter.split_text(doc.page_content)
+        # Merge original document metadata (subject/lesson) into the new smart chunks
+        for md_split in md_header_splits:
+            md_split.metadata.update(doc.metadata)
+        # Split further if needed
+        splits = text_splitter.split_documents(md_header_splits)
+        docs.extend(splits)
     
     print(f"Split {len(documents)} documents into {len(docs)} smart chunks.")
     
