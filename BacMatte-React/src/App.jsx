@@ -28,13 +28,20 @@ export default function App() {
     setPageState(p)
   }
 
-  // Apply lang/dir to document
+  // Apply lang/dir and page-specific body classes
   useEffect(() => {
     document.body.classList.remove('ar', 'fr')
     document.body.classList.add(lang)
     document.documentElement.lang = lang
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
-  }, [lang])
+    
+    // Completely lock the body from scrolling when in the chat interface
+    if (page === 'tutor') {
+      document.body.classList.add('tutor-active')
+    } else {
+      document.body.classList.remove('tutor-active')
+    }
+  }, [lang, page])
 
   const handleLangChange = (l) => {
     setLang(l)
