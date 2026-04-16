@@ -12,7 +12,12 @@ import { useAuth } from './context/AuthContext'
 export default function App() {
   const { user } = useAuth()
   const [lang, setLang] = useState('ar')
-  const [page, setPageState] = useState(() => localStorage.getItem('bacmatte_page') || 'landing')
+  const [page, setPageState] = useState(() => {
+    const saved = localStorage.getItem('bacmatte_page')
+    // If guest user returns, ignore localStorage and explicitly show Landing page
+    if (!user && saved !== 'landing') return 'landing'
+    return saved || 'landing'
+  })
   const [level, setLevelState] = useState(() => localStorage.getItem('bacmatte_level') || '')
   const [subject, setSubjectState] = useState(() => {
     try {
