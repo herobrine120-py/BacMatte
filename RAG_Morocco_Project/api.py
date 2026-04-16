@@ -11,6 +11,7 @@ from pydantic import BaseModel, field_validator
 from dotenv import load_dotenv
 from supabase import create_client, Client
 
+from typing import Optional
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 try:
     from langchain_chroma import Chroma
@@ -110,8 +111,8 @@ class ChatRequest(BaseModel):
     subject: str = ""
     level: str = "2BAC"
     mode: str = "chat"
-    session_id: str | None = None
-    image_base64: str | None = None
+    session_id: Optional[str] = None
+    image_base64: Optional[str] = None
 
     @field_validator("question")
     @classmethod

@@ -241,7 +241,7 @@ export default function Tutor({ lang, setPage, level, subject }) {
       (err) => {
         setMessages(prev => [...prev, {
           role: 'ai',
-          content: `⚠️ **خطأ في الاتصال**:<br>${err}<br><br>الرجاء التأكد من اتصالك بالإنترنت، أو المحاولة لاحقاً.`,
+          content: `⚠️ **خطأ في الاتصال**:\n\n${err}\n\nالرجاء التأكد من اتصالك بالإنترنت، أو المحاولة لاحقاً.`,
           id: `err-${Date.now()}`
         }])
         setStreaming('')
